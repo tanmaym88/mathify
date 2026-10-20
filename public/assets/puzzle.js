@@ -56,20 +56,21 @@
   function snapTo(c, x, y) { c.classList.add('snap'); setPos(c, x, y); setTimeout(function () { c.classList.remove('snap'); }, 220); }
   function placeInSlot(c, i) { occupant[i] = c; c._slot = i; var p = slotPos(i); snapTo(c, p.x, p.y); }
 
-  function randomPos(placed) {
-    var a = rel(scatter), z = size(), pad = 8, best;
-    for (var t = 0; t < 80; t++) {
-      var x = a.x + pad + Math.random() * (a.w - z - 2 * pad), y = a.y + pad + Math.random() * (a.h - z - 2 * pad);
-      best = { x: x, y: y };
-      if (placed.every(function (p) { return Math.hypot(p.x - x, p.y - y) > z * 1.05; })) break;
-    }
-    return best;
-  }
-
+  // Deal the cards into random cells of a grid inside the card area (with a little jitter),
+  // so no card ever hides another — important on small phone screens.
   function shuffle() {
     occupant.fill(null); msg.textContent = ''; msg.className = '';
-    var placed = [];
-    cards.forEach(function (c) { c._slot = null; c.classList.remove('wrong'); var p = randomPos(placed); placed.push(p); setPos(c, p.x, p.y); });
+    var a = rel(scatter), z = size(), pad = 6, gap = 6;
+    var cols = Math.max(1, Math.floor((a.w - 2 * pad + gap) / (z + gap)));
+    var rows = Math.max(Math.ceil(N / cols), Math.floor((a.h - 2 * pad + gap) / (z + gap)));
+    var cw = (a.w - 2 * pad) / cols, ch = (a.h - 2 * pad) / rows, cells = [];
+    for (var r = 0; r < rows; r++) for (var k = 0; k < cols; k++) cells.push([k, r]);
+    for (var i = cells.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = cells[i]; cells[i] = cells[j]; cells[j] = t; }
+    cards.forEach(function (c, n) {
+      c._slot = null; c.classList.remove('wrong');
+      var cell = cells[n], jx = Math.max(0, cw - z), jy = Math.max(0, ch - z);
+      setPos(c, a.x + pad + cell[0] * cw + Math.random() * jx, a.y + pad + cell[1] * ch + Math.random() * jy);
+    });
   }
 
   function slotUnder(c) {
@@ -80,18 +81,33 @@
   function clamp(c) { var z = size(); setPos(c, Math.min(Math.max(c._x, 0), stage.clientWidth - z), Math.min(Math.max(c._y, 0), stage.clientHeight - z)); }
 
   function addDrag(c) {
-    var offX, offY, start, startSlot;
+    var offX, offY, start, startSlot, lastX = 0, lastY = 0, raf = null;
+    function move() {
+      var s = stage.getBoundingClientRect(); setPos(c, lastX - s.left - offX, lastY - s.top - offY);
+      var hit = slotUnder(c); slots.forEach(function (sl, i) { sl.classList.toggle('hover', i === hit); });
+    }
+    // Scroll the page while a card is held near the top or bottom edge (small phone screens).
+    function edgeScroll() {
+      raf = null;
+      if (!c.classList.contains('dragging')) return;
+      var m = 70, h = window.innerHeight, dy = 0;
+      if (lastY > h - m) dy = Math.min(16, 4 + (lastY - (h - m)) / 4);
+      else if (lastY < m) dy = -Math.min(16, 4 + (m - lastY) / 4);
+      if (!dy) return;
+      var before = window.scrollY; window.scrollBy(0, dy);
+      if (window.scrollY !== before) { move(); raf = requestAnimationFrame(edgeScroll); }
+    }
     c.addEventListener('pointerdown', function (e) {
       e.preventDefault(); c.setPointerCapture(e.pointerId);
-      var r = c.getBoundingClientRect(); offX = e.clientX - r.left; offY = e.clientY - r.top;
+      var r = c.getBoundingClientRect(); offX = e.clientX - r.left; offY = e.clientY - r.top; lastX = e.clientX; lastY = e.clientY;
       start = { x: c._x, y: c._y }; startSlot = c._slot;
       if (startSlot != null) { occupant[startSlot] = null; c._slot = null; }
       c.classList.remove('wrong'); c.classList.add('dragging'); msg.textContent = ''; msg.className = '';
     });
     c.addEventListener('pointermove', function (e) {
       if (!c.classList.contains('dragging')) return;
-      var s = stage.getBoundingClientRect(); setPos(c, e.clientX - s.left - offX, e.clientY - s.top - offY);
-      var hit = slotUnder(c); slots.forEach(function (sl, i) { sl.classList.toggle('hover', i === hit); });
+      lastX = e.clientX; lastY = e.clientY; move();
+      if (!raf) raf = requestAnimationFrame(edgeScroll);
     });
     function end() {
       if (!c.classList.contains('dragging')) return;
