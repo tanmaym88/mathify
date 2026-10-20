@@ -58,20 +58,26 @@ with sync_playwright() as p:
     pg.click("text=Enquiries"); pg.wait_for_selector("text=Ishaan Rao")
     ok("enquiry details visible", "IGCSE" in pg.inner_text("main") and "Kavya Rao" in pg.inner_text("main"))
     ok("bot enquiry not listed", "Bot" not in pg.inner_text("main"))
-    pg.click("[data-convert]")
-    ok("convert form prefilled with student email", pg.input_value("#c-email") == "ishaan@example.com")
-    pg.click("#modal-form button[value=ok]")
-    ok("fee required on convert", "Fee per hour is required" in pg.inner_text("#modal-error"))
-    pg.fill("#c-fee", "800"); pg.click("#modal-form button[value=ok]")
-    pg.wait_for_selector("#sform")
+    pg.click("[data-convert]"); pg.wait_for_selector("#sform")
+    ok("Create student opens full form with enquiry picked", pg.eval_on_selector("#enq-pick", "e => e.options[e.selectedIndex].text").startswith("Ishaan Rao"))
+    ok("form prefilled with student email", pg.input_value("#f-email") == "ishaan@example.com")
     ok("converted student carries parent + phone", pg.input_value("#f-parent_name") == "Kavya Rao" and pg.input_value("#f-phone") == "98200 11111")
     ok("mode mapped to Offline", pg.input_value("#f-mode") == "Offline")
+    pg.click("#save")
+    ok("fee required", "Fee per hour is required" in pg.inner_text("#ferr"))
+    pg.fill("#f-fee_per_hour", "800")
     # set schedule for today's weekday (IST)
     today_day = pg.evaluate("""() => { const d = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',weekday:'short'}).format(new Date()); return d.slice(0,3); }""")
     pg.check(f"input[name=day-{today_day}]")
     pg.fill(f"input[name=from-{today_day}]", "17:00"); pg.fill(f"input[name=to-{today_day}]", "18:00")
     pg.click("#save"); pg.wait_for_selector("text=Start class now")
     sid = pg.url.split("/students/")[1].split("/")[0]
+    st = pg.request.get(B + "/api/students/" + sid).json()["student"]
+    ok("student saved with fee + schedule", st["fee_per_hour"] == 800 and today_day in st["schedule"], st)
+    enq = pg.request.get(B + "/api/enquiries").json()["enquiries"]
+    ok("enquiry marked converted and linked", any(e["status"] == "converted" and str(e["student_id"]) == sid for e in enq), enq)
+    pg.goto(B + "/app/#/students/new"); pg.wait_for_selector("#enq-pick")
+    ok("converted enquiry no longer offered", "Ishaan" not in pg.inner_text("#enq-pick"))
     ok("student saved with schedule", True)
 
     # ---------- 5. today: start + end class ----------

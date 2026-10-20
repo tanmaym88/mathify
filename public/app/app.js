@@ -110,7 +110,7 @@
       if (state.me.role !== 'admin') return await studentHome(parts[0] === 'student' ? Number(parts[1]) : null);
       if (!parts.length) return await adminToday();
       if (parts[0] === 'students' && parts.length === 1) return await studentsList();
-      if (parts[0] === 'students' && parts[1] === 'new') return await studentForm(null);
+      if (parts[0] === 'students' && parts[1] === 'new') return await studentForm(null, null, Number(parts[2]) || null);
       if (parts[0] === 'students' && parts[2] === 'edit') return await studentForm(Number(parts[1]));
       if (parts[0] === 'students') return await studentDetail(Number(parts[1]), parts[2] || 'attendance');
       if (parts[0] === 'enquiries') return await enquiries(parts[1] || 'new');
@@ -294,25 +294,61 @@
     return out;
   }
 
-  async function studentForm(id, preset) {
-    const s = id ? (await api('/students/' + id)).student : (preset || {});
+  // Turn an enquiry (website form or old Google Form) into Add-student form values.
+  function enquiryToStudent(e) {
+    const d = e.data, email = v => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || '') ? v.trim() : '');
+    const hours = parseFloat(d.hours), level = parseInt(d.level, 10);
+    const gender = /^f/i.test(d.gender || '') ? 'Female' : /^m/i.test(d.gender || '') ? 'Male' : d.gender ? 'Others' : '';
+    const extra = [['Days', d.days], ['Time', d.time], ['Demo class', d.demo], ['Heard via', d.source], ['Message', d.message]]
+      .filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    return {
+      name: d.student || '', email: email(d.semail), parent_name: d.parent || '', parent_email: email(d.pemail),
+      phone: d.phone || '', grade: d.grade || '', exams: d.exams || '',
+      mode: /offline/i.test(d.mode || '') ? 'Offline' : /online/i.test(d.mode || '') ? 'Online' : '',
+      hours_per_week: hours > 0 && hours <= 40 ? hours : '', dob: /^\d{4}-\d{2}-\d{2}$/.test(d.dob || '') ? d.dob : '',
+      gender, city: d.city || '', country: d.country || '', objective: d.objective || '',
+      maths_level: level >= 1 && level <= 10 ? level : '',
+      notes: extra.length ? `From enquiry of ${niceDate(e.created_at.slice(0, 10))}. ${extra.join('. ')}` : ''
+    };
+  }
+
+  async function studentForm(id, preset, enqId) {
+    let s = id ? (await api('/students/' + id)).student : (preset || {});
+    let open = [], enq = null;
+    if (!id) {
+      open = (await api('/enquiries')).enquiries.filter(e => !e.student_id);
+      enq = open.find(e => e.id === enqId) || null;
+      if (enq) s = enquiryToStudent(enq);
+    }
+    const picker = id ? '' : `
+      <div class="card">
+        <label for="enq-pick">Fill from an enquiry <span class="hint">(optional)</span></label>
+        <select id="enq-pick">
+          <option value="">— Start blank —</option>
+          ${open.map(e => `<option value="${e.id}" ${enq && enq.id === e.id ? 'selected' : ''}>${esc(e.data.student || '?')}${e.data.grade ? ' · ' + esc(e.data.grade) : ''} · ${esc(niceDate(e.created_at.slice(0, 10)))}${e.data.via ? ' · ' + esc(e.data.via) : ''}</option>`).join('')}
+        </select>
+        <p class="hint" style="margin:6px 0 0">${open.length ? 'Picks up the details from the enquiry; check the Google emails and set the fee.' : 'No open enquiries.'}</p>
+      </div>`;
     view.innerHTML = `
       <a href="${id ? '#/students/' + id + '/details' : '#/students'}">← Back</a>
       <h1>${id ? 'Edit ' + esc(s.name) : 'Add student'}</h1>
-      <p class="sub">Students and parents sign in with the Google emails below.</p>
+      <p class="sub">Students and parents sign in with the Google emails below.</p>${picker}
       <form class="card" id="sform" novalidate>
         ${studentFields(s)}
         <p class="form-error" id="ferr"></p>
         <div class="row"><button class="btn" id="save">${id ? 'Save changes' : 'Add student'}</button>
         <a class="btn secondary" href="${id ? '#/students/' + id + '/details' : '#/students'}">Cancel</a></div>
       </form>`;
+    if ($('#enq-pick')) $('#enq-pick').onchange = ev => { location.hash = '#/students/new' + (ev.target.value ? '/' + ev.target.value : ''); };
     $('#sform').onsubmit = e => {
       e.preventDefault();
       act($('#save'), async () => {
         $('#ferr').textContent = '';
         try {
           const data = readStudentForm(e.target);
-          const r = id ? await api('/students/' + id, { method: 'PUT', body: data }) : await api('/students', { method: 'POST', body: data });
+          const r = id ? await api('/students/' + id, { method: 'PUT', body: data })
+            : enq ? await api(`/enquiries/${enq.id}/convert`, { method: 'POST', body: data })
+            : await api('/students', { method: 'POST', body: data });
           toast(id ? 'Saved' : 'Student added');
           location.hash = '#/students/' + r.student.id;
         } catch (err) { $('#ferr').textContent = err.message; }
@@ -567,9 +603,9 @@
     const list = filter === 'all' ? all : all.filter(e => e.status === filter);
     const L = { student: 'Student', grade: 'Grade', exams: 'Curriculum / exams', parent: 'Parent', phone: 'WhatsApp', pemail: 'Parent email',
       semail: 'Student email', city: 'City', country: 'Country', mode: 'Mode', hours: 'Hours/week', days: 'Days', time: 'Time',
-      objective: 'Objective', level: 'Maths level', demo: 'Demo class', source: 'Heard via', dob: 'DOB', gender: 'Gender', message: 'Message' };
+      objective: 'Objective', level: 'Maths level', demo: 'Demo class', source: 'Heard via', dob: 'DOB', gender: 'Gender', message: 'Message', via: 'Came via' };
     view.innerHTML = `
-      <h1>Enquiries</h1><p class="sub">From the enquiry form on the website.</p>
+      <h1>Enquiries</h1><p class="sub">From the website enquiry form, plus older Google Form responses.</p>
       <div class="pills">${['new', 'contacted', 'converted', 'closed', 'all'].map(k =>
         `<a href="#/enquiries/${k}" class="${filter === k ? 'active' : ''}">${k[0].toUpperCase() + k.slice(1)}${k !== 'all' ? ' (' + counts[k] + ')' : ''}</a>`).join('')}</div>
       ${list.length ? list.map(e => `
@@ -589,20 +625,7 @@
     $$('[data-status]').forEach(sel => sel.onchange = () => act(null, async () => {
       await api('/enquiries/' + sel.dataset.status, { method: 'PUT', body: { status: sel.value } }); toast('Updated'); router();
     }));
-    $$('[data-convert]').forEach(b => b.onclick = () => {
-      const e = all.find(x => x.id === Number(b.dataset.convert));
-      openModal(`<h2>Create student: ${esc(e.data.student)}</h2>
-        <p class="sub">Other details are copied from the enquiry; you can edit them later.</p>
-        <div class="fields">
-          <div class="full"><label for="c-email">Student's Google email *</label><input id="c-email" name="email" type="email" value="${esc(e.data.semail || '')}" required></div>
-          <div class="full"><label for="c-pemail">Parent's Google email</label><input id="c-pemail" name="parent_email" type="email" value="${esc(e.data.pemail || '')}"></div>
-          <div><label for="c-fee">Fee per hour (₹) *</label><input id="c-fee" name="fee_per_hour" type="number" min="0" required></div>
-        </div>${modalButtons('Create student')}`, async fd => {
-        if (!fd.get('fee_per_hour')) throw new Error('Fee per hour is required');
-        const r = await api(`/enquiries/${e.id}/convert`, { method: 'POST', body: { email: fd.get('email'), parent_email: fd.get('parent_email'), fee_per_hour: Number(fd.get('fee_per_hour')) } });
-        toast('Student created'); location.hash = `#/students/${r.student.id}/edit`;
-      });
-    });
+    $$('[data-convert]').forEach(b => b.onclick = () => { location.hash = '#/students/new/' + b.dataset.convert; });
   }
 
   /* ============ student / parent view ============ */
