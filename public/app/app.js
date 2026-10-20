@@ -116,6 +116,7 @@
       if (parts[0] === 'students' && parts[2] === 'edit') return await studentForm(Number(parts[1]));
       if (parts[0] === 'students') return await studentDetail(Number(parts[1]), parts[2] || 'attendance');
       if (parts[0] === 'enquiries') return await enquiries(parts[1] || 'new');
+      if (parts[0] === 'preview') return await studentHome(null, Number(parts[1]));
       view.innerHTML = '<p>Page not found. <a href="#/">Go home</a></p>';
     } catch (e) {
       if (state.me) view.innerHTML = `<div class="card"><p class="form-error">${esc(e.message)}</p><a href="#/">Back</a></div>`;
@@ -364,8 +365,9 @@
     state.viewing = s;
     const contact = [
       s.phone ? `<a class="btn small wa" target="_blank" rel="noopener" href="https://wa.me/${waNumber(s.phone)}">WhatsApp</a>` : '',
-      s.parent_email || s.email ? `<a class="btn small secondary" href="mailto:${esc(s.parent_email || s.email)}">Email</a>` : ''
-    ].join(' ');
+      s.parent_email || s.email ? `<a class="btn small secondary" href="mailto:${esc(s.parent_email || s.email)}">Email</a>` : '',
+      `<a class="btn small secondary" href="#/preview/${s.id}" title="See exactly what ${esc(s.name)} and their parents see">👁 Student view</a>`
+    ].filter(Boolean).join(' ');
     view.innerHTML = `
       <a href="#/students">← All students</a>
       <div class="row spread" style="margin-top:6px"><div>
@@ -632,12 +634,14 @@
   }
 
   /* ============ student / parent view ============ */
-  async function studentHome(sidParam) {
-    const kids = state.me.students;
-    const sid = sidParam && kids.some(k => k.id === sidParam) ? sidParam : kids[0].id;
+  // previewId: admin-only preview of a student's page (read-only, same view the student/parent gets)
+  async function studentHome(sidParam, previewId) {
+    const kids = previewId ? [] : state.me.students;
+    const sid = previewId || (sidParam && kids.some(k => k.id === sidParam) ? sidParam : kids[0].id);
     const { student: s } = await api('/students/' + sid);
     const sched = DAYS.filter(d => s.schedule[d]).map(d => `${d} ${s.schedule[d].from}–${s.schedule[d].to}`).join(' · ');
     view.innerHTML = `
+      ${previewId ? `<div class="preview-banner"><span>👁 Preview: this is what <b>${esc(s.name)}</b> and their parents see when they sign in.${s.is_active ? '' : ' (Inactive students can’t sign in.)'}</span><a class="btn small" href="#/students/${s.id}">Back to admin</a></div>` : ''}
       ${kids.length > 1 ? `<div class="pills">${kids.map(k => `<a href="#/student/${k.id}" class="${k.id === sid ? 'active' : ''}">${esc(k.name)}</a>`).join('')}</div>` : ''}
       <h1>${esc(s.name)}</h1>
       <p class="sub">${esc(sched || 'Schedule to be confirmed')} · ${inr(s.fee_per_hour)}/hour</p>

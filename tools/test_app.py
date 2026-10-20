@@ -140,6 +140,15 @@ with sync_playwright() as p:
     pg.click(".tabs >> text=Students"); pg.wait_for_selector("#search")
     pg.fill("#search", "zzz"); ok("search filters", pg.locator("#rows tr").count() == 0)
     pg.fill("#search", "ishaan"); ok("search finds student", pg.locator("#rows tr").count() == 1)
+    # admin "Student view" preview = exactly the student/parent page, read-only
+    pg.goto(B + f"/app/#/students/{sid}/attendance"); pg.wait_for_selector("text=Student view")
+    pg.click("text=Student view"); pg.wait_for_selector(".preview-banner")
+    pv = pg.inner_text("main")
+    ok("student view preview shows fees + classes", "Ishaan Rao" in pv and "₹" in pv)
+    ok("student view preview has no admin controls", pg.locator("[data-pay],[data-unpay],[data-edit],[data-del],#start-now,#add-past").count() == 0)
+    ok("student view preview hides private notes", "Private notes" not in pv)
+    pg.click(".preview-banner >> text=Back to admin"); pg.wait_for_selector("text=Student view")
+    ok("back to admin from preview", "/students/" in pg.url)
     ok("no JS errors (admin)", not errors, errors)
 
     # ---------- 8. parent view ----------
