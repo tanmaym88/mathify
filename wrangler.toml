@@ -15,9 +15,10 @@ ADMIN_EMAILS = "tanmaym88@gmail.com"
 # WhatsApp number used on invoices / reminders (digits only, with country code).
 BUSINESS_WHATSAPP = "919766072237"
 BUSINESS_EMAIL = "tanmaym88@gmail.com"
+# Google sign-in client ID (public). Client SECRET stays a dashboard secret.
+GOOGLE_CLIENT_ID = "733312435250-upoontnokio60gvl41uvcl2jfvuceonq.apps.googleusercontent.com"
 
 # Secrets (NOT in this file). Set them in Cloudflare → Pages → Settings → Variables and secrets,
 # or locally in .dev.vars:
-#   GOOGLE_CLIENT_ID
 #   GOOGLE_CLIENT_SECRET
 #   SESSION_SECRET   (any long random string)
