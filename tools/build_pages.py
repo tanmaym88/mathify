@@ -247,6 +247,11 @@ students = [
 ]
 
 
+# Display order: strongest testimonials first (specific, heartfelt, real outcomes), short/generic ones last.
+# Numbers are positions in the lists above, so the original wording stays untouched.
+parents = [parents[i] for i in (3, 2, 0, 1)]
+students = [students[i] for i in (0, 1, 6, 8, 2, 13, 19, 16, 18, 10, 7, 3, 5, 15, 17, 12, 9, 11, 20, 22, 21, 4, 14, 24, 23, 25)]
+
 # Illustrated (clearly generic) avatar per testimonial — never a photo, so no one is mistaken for the writer.
 AVATAR = {
     "Vikas Johri": "man", "Ujjwal Mahajan": "man", "Vibha Jain": "woman", "Komal Dharendra": "woman",
@@ -258,10 +263,12 @@ AVATAR = {
 
 
 def quotes(items):
-    out = []
+    out, seen = [], {}
     for q, who, where in items:
         meta = f"<strong>{html.escape(who)}</strong>" + (f", {html.escape(where)}" if where else "")
-        av = AVATAR.get(who, "student")
+        kind = AVATAR.get(who, "student")
+        seen[kind] = seen.get(kind, 0) + 1          # rotate the 4 variants so neighbours differ
+        av = f"{kind}-{(seen[kind] - 1) % 4 + 1}"
         out.append(f'          <blockquote class="quote"><img class="quote-avatar" src="/images/avatars/{av}.svg" alt="" width="56" height="56">'
                    f'<div class="quote-body"><p>“{html.escape(q)}”</p><footer>— {meta}</footer></div></blockquote>')
     return "\n".join(out)
