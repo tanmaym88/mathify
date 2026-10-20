@@ -76,6 +76,8 @@
 
   /* ============ state & routing ============ */
   const state = { me: null, students: null, viewing: null };
+  // Logo for PDF invoices (loaded once; invoices still work without it).
+  fetch('/assets/logo-invoice.png').then(r => r.ok ? r.blob() : null).then(b => b && new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b); })).then(d => { if (d) state.logo = d; }).catch(() => {});
 
   function setTabs() {
     const top = $('.topbar'); top.hidden = false;
@@ -131,6 +133,7 @@
       : err ? '<p class="form-error">Sign-in didn\'t complete. Please try again.</p>' : '';
     view.innerHTML = `
       <div class="card login">
+        <img class="login-logo" src="/assets/logo.svg" alt="Mathify logo" width="64" height="88">
         <a class="brand" href="/welcome">MATHIFY</a>
         <p class="sub">Classes, attendance, fees and invoices</p>
         ${msg}
@@ -521,7 +524,8 @@
     const W = doc.internal.pageSize.getWidth(), L = 48, R = W - 48;
     let y = 56;
     doc.setFillColor(254, 203, 112); doc.rect(0, 0, W, 8, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(47, 49, 146); doc.text('MATHIFY', L, y);
+    if (state.logo) doc.addImage(state.logo, 'PNG', L, y - 37, 30, 41);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(47, 49, 146); doc.text('MATHIFY', state.logo ? L + 40 : L, y);
     doc.setFontSize(18); doc.setTextColor(31, 42, 55); doc.text('INVOICE', R, y, { align: 'right' });
     y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(93, 102, 117);
     doc.text(`${inv.business.owner} · ${inv.business.city}`, L, y);

@@ -123,3 +123,6 @@ dialog::backdrop { background: rgba(20,25,35,.5); }
   tr.clickable td:first-child::before { content: none; }
 }
 .badge { white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand-logo { height: 36px; width: auto; border-radius: 4px; display: block; }
+.login-logo { display: block; margin: 0 auto 10px; height: 88px; width: auto; border-radius: 8px; }

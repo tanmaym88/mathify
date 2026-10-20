@@ -53,6 +53,9 @@ img { max-width: 100%; height: auto; display: block; }
   min-height: 60px;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 900;
   font-size: 1.5rem;
   letter-spacing: .04em;
@@ -407,3 +410,4 @@ legend { font-weight: 900; color: var(--navy); font-size: 1.05rem; margin-bottom
 .prose h2 { font-size: 1.15rem; margin: 1.4em 0 .4em; color: var(--navy, #2f3192); }
 .prose ul { padding-left: 1.2em; }
 .prose li { margin: .35em 0; }
+.brand-logo { height: 40px; width: auto; border-radius: 5px; display: block; }
