@@ -247,11 +247,23 @@ students = [
 ]
 
 
+# Illustrated (clearly generic) avatar per testimonial — never a photo, so no one is mistaken for the writer.
+AVATAR = {
+    "Vikas Johri": "man", "Ujjwal Mahajan": "man", "Vibha Jain": "woman", "Komal Dharendra": "woman",
+    "Anika Dharendra": "girl", "Arin Swadi": "boy", "Nidhi Mehta": "girl", "Tanish Mehta": "boy",
+    "Khwaish Mehta": "girl", "Siddharth Ray": "boy", "Ashmik Mehngi": "boy", "Khushii Luniya": "girl",
+    "Rithwik Sharma": "boy", "Nimit Mahajan": "boy", "Hitanshu Sanghvi": "boy", "Kashvi": "girl",
+    "Abhinav Khemani": "boy", "Aviral M.": "boy", "Avantika": "girl", "Akshat G.": "boy",
+}
+
+
 def quotes(items):
     out = []
     for q, who, where in items:
         meta = f"<strong>{html.escape(who)}</strong>" + (f", {html.escape(where)}" if where else "")
-        out.append(f'          <blockquote class="quote"><p>“{html.escape(q)}”</p><footer>— {meta}</footer></blockquote>')
+        av = AVATAR.get(who, "student")
+        out.append(f'          <blockquote class="quote"><img class="quote-avatar" src="/images/avatars/{av}.svg" alt="" width="56" height="56">'
+                   f'<div class="quote-body"><p>“{html.escape(q)}”</p><footer>— {meta}</footer></div></blockquote>')
     return "\n".join(out)
 
 
