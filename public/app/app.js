@@ -522,7 +522,7 @@
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const W = doc.internal.pageSize.getWidth(), L = 48, R = W - 48;
     let y = 56;
-    doc.setFillColor(254, 203, 112); doc.rect(0, 0, W, 8, 'F');
+    doc.setFillColor(255, 213, 79); doc.rect(0, 0, W, 8, 'F');
     if (state.logo) doc.addImage(state.logo, 'PNG', L, y - 36, 146, 40);
     else { doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(47, 49, 146); doc.text('MATHIFY', L, y); }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(31, 42, 55); doc.text('INVOICE', R, y, { align: 'right' });

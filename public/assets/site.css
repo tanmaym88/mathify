@@ -2,8 +2,9 @@
 :root {
   --navy: #2f3192;
   --navy-dark: #22246e;
-  --sun: #fecb70;
-  --sun-dark: #f3b545;
+  --sun: #ffd54f;        /* brand yellow: surfaces (header, table heads) */
+  --sun-dark: #f2bd1d;
+  --orange: #f7941d;     /* brand accent (the π): decoration only — never text on white/yellow, never white text on it */
   --ink: #1f2a37;
   --muted: #55606e;
   --paper: #ffffff;
@@ -167,6 +168,7 @@ main { flex: 1; width: 100%; }
   text-align: center;
   text-shadow: 0 1px 1px rgba(0,0,0,.12);
 }
+.page-title::after { content: ""; display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--orange); margin: 12px auto 0; }
 .card h2 {
   color: var(--navy);
   font-size: 1.25rem;
@@ -191,6 +193,7 @@ main { flex: 1; width: 100%; }
   max-width: 900px;
   text-shadow: 0 1px 1px rgba(0,0,0,.2);
 }
+.hero h1::after { content: ""; display: block; width: 88px; height: 5px; border-radius: 3px; background: var(--orange); margin: 18px auto 0; }
 .tiles {
   max-width: 980px;
   margin: 24px auto 56px;
@@ -207,7 +210,7 @@ main { flex: 1; width: 100%; }
   padding: 20px 22px;
   text-decoration: none;
   color: var(--ink);
-  border-top: 5px solid var(--sun);
+  border-top: 5px solid var(--orange);
   transition: transform .15s, box-shadow .15s;
 }
 .tile:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(31,42,55,.12); color: var(--ink); }
@@ -366,6 +369,7 @@ table.fees td { font-weight: 700; font-variant-numeric: tabular-nums; }
 }
 @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
 .stat {
+  border-top: 4px solid var(--orange);
   background: #f6f7fd;
   border-radius: 12px;
   padding: 14px 12px;
@@ -412,3 +416,5 @@ legend { font-weight: 900; color: var(--navy); font-size: 1.05rem; margin-bottom
 .prose li { margin: .35em 0; }
 .brand-lockup { height: 40px; width: auto; display: block; }
 @media (max-width: 400px) { .brand-lockup { height: 34px; } }
+/* key facts on the teacher page: orange underline accent */
+.teacher strong.hl { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 3px; text-underline-offset: 4px; text-decoration-skip-ink: none; }

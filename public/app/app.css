@@ -1,5 +1,5 @@
 :root {
-  --navy: #2f3192; --navy-dark: #22246e; --sun: #fecb70; --ink: #1f2a37; --muted: #5d6675;
+  --navy: #2f3192; --navy-dark: #22246e; --sun: #ffd54f; --ink: #1f2a37; --muted: #5d6675;
   --line: #e3e5ef; --bg: #f5f6fb; --card: #fff; --green: #17803d; --green-bg: #e7f6ec;
   --red: #b42318; --red-bg: #fdecea; --amber: #a15c00; --amber-bg: #fff4e0; --radius: 12px;
 }
@@ -88,7 +88,7 @@ dialog::backdrop { background: rgba(20,25,35,.5); }
 #toast.error { background: var(--red); }
 
 /* login */
-.login { max-width: 400px; margin: 10vh auto; text-align: center; }
+.login { max-width: 400px; margin: 10vh auto; text-align: center; border-top: 5px solid #f7941d; }
 .login .brand { font-size: 2rem; display: block; margin-bottom: 6px; }
 .login .btn { width: 100%; padding: 12px; font-size: 1rem; margin-top: 18px; }
 .login .note { color: var(--muted); font-size: .9rem; margin-top: 16px; }
