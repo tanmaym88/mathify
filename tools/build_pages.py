@@ -66,7 +66,9 @@ def page(path, title, description, body, current=None, extra_scripts=""):
     © Mathify · Tanmay Mogra · Pune, India ·
     <a href="https://wa.me/919766072237">WhatsApp</a> ·
     <a href="mailto:tanmaym88@gmail.com">Email</a> ·
-    <a href="/feedback">Give feedback</a>
+    <a href="/feedback">Give feedback</a> ·
+    <a href="/privacy">Privacy</a> ·
+    <a href="/terms">Terms</a>
   </footer>
   <script src="/assets/nav.js"></script>{extra_scripts}
 </body>
@@ -423,5 +425,55 @@ contact = f"""    <div class="page">
     </div>"""
 page("/contact", "Contact", "Contact Mathify — send an enquiry on WhatsApp or by email.", contact, current="/contact",
      extra_scripts='\n  <script src="/assets/contact.js"></script>')
+
+# ---------------- Privacy ----------------
+privacy = """    <div class="page">
+      <h1 class="page-title">Privacy Policy</h1>
+      <div class="card prose">
+        <p><em>Last updated: 20 October 2026</em></p>
+        <p>Mathify (mathify.world) is a Maths tutoring practice run by Tanmay Mogra in Pune, India. This page explains what information Mathify collects and how it is used.</p>
+        <h2>What we collect</h2>
+        <ul>
+          <li><strong>Enquiries:</strong> when you send the contact form, the details you type (student and parent names, email, phone, grade, preferences and message) are saved so Mathify can reply.</li>
+          <li><strong>Student records:</strong> for enrolled students, Mathify keeps the class schedule, attendance, hourly fee, payments and invoices.</li>
+          <li><strong>Google sign-in:</strong> when a student, parent or the teacher signs in to <a href="/app/">mathify.world/app</a> with Google, we receive only the account's name, email address and profile picture. The email is used to match you to your student record. We never see or store your Google password, and we do not access your Gmail, Drive or any other Google data.</li>
+          <li><strong>Cookies and browser storage:</strong> a single sign-in cookie keeps you logged in for up to 14 days. The home-page puzzle remembers in your browser that you solved it. No advertising or tracking cookies are used.</li>
+        </ul>
+        <h2>How it is used</h2>
+        <p>Only to run classes: replying to enquiries, scheduling, recording attendance, and preparing fee invoices and reminders. Your information is never sold, rented or used for advertising.</p>
+        <h2>Who can see it</h2>
+        <p>Only the teacher (Tanmay Mogra). A signed-in student or parent can see only their own records. The data is stored on Cloudflare's servers, which host this website. Invoices and reminders you choose to send open in your own WhatsApp or email app.</p>
+        <h2>Your choices</h2>
+        <p>You can ask to see, correct or delete your information at any time by writing to <a href="mailto:tanmaym88@gmail.com">tanmaym88@gmail.com</a> or on <a href="https://wa.me/919766072237">WhatsApp</a>. Records of former students are deleted on request.</p>
+        <h2>Changes</h2>
+        <p>If this policy changes, the updated version will be posted on this page with a new date.</p>
+      </div>
+    </div>"""
+page("/privacy", "Privacy Policy", "How Mathify collects, uses and protects your information.", privacy)
+
+# ---------------- Terms ----------------
+terms = """    <div class="page">
+      <h1 class="page-title">Terms of Use</h1>
+      <div class="card prose">
+        <p><em>Last updated: 20 October 2026</em></p>
+        <p>These terms cover the mathify.world website and the Mathify student app at <a href="/app/">mathify.world/app</a>, run by Tanmay Mogra, Pune, India.</p>
+        <h2>Classes and fees</h2>
+        <p>Class fees, billing and the rescheduling and cancellation policy are set out on the <a href="/fees-and-schedule">Fees and Schedule</a> page and agreed when a student enrols.</p>
+        <h2>Using the app</h2>
+        <ul>
+          <li>Sign in only with the Google account registered with Mathify for your child or yourself.</li>
+          <li>Keep your Google account secure; anyone who can sign in to it can see your Mathify records.</li>
+          <li>Tell Mathify if any attendance, fee or payment record looks wrong, and it will be corrected.</li>
+        </ul>
+        <h2>Content</h2>
+        <p>The text, images and teaching material on this website belong to Mathify and may not be copied for commercial use without permission.</p>
+        <h2>No guarantee</h2>
+        <p>The website and app are provided as they are. Mathify works to keep them accurate and available but cannot promise they will always be error-free or online.</p>
+        <h2>Contact</h2>
+        <p>Questions about these terms: <a href="mailto:tanmaym88@gmail.com">tanmaym88@gmail.com</a>.</p>
+        <p>See also the <a href="/privacy">Privacy Policy</a>.</p>
+      </div>
+    </div>"""
+page("/terms", "Terms of Use", "Terms of use for the Mathify website and student app.", terms)
 
 print("pages written")
