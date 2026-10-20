@@ -485,6 +485,7 @@ route('POST', '/api/enquiries/:id/convert', async ({ user, env, params, request 
 /* ---------------- entry point ---------------- */
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
+  if (!env.DB) return fail(503, 'The Mathify app database is not connected yet. See README → Database (D1).');
   try {
     // Block cross-site writes (CSRF): mutating requests must come from this site.
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
