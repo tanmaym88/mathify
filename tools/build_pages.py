@@ -491,3 +491,7 @@ terms = """    <div class="page">
 page("/terms", "Terms of Use", "Terms of use for the Mathify website and student app.", terms)
 
 print("pages written")
+
+# cache-busting version tags on CSS/JS/image links (all pages, incl. hand-written ones)
+import subprocess
+subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "stamp_assets.py"), ROOT], check=True)
