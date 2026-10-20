@@ -1,0 +1,16 @@
+{
+  "name": "mathify",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --port 8788",
+    "migrate:local": "wrangler d1 migrations apply mathify --local",
+    "migrate:remote": "wrangler d1 migrations apply mathify --remote",
+    "build:pages": "python3 tools/build_pages.py public",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^4.151.2"
+  }
+}

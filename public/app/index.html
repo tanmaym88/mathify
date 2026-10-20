@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Mathify App</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/app/app.css">
+</head>
+<body>
+  <header class="topbar" hidden>
+    <a class="brand" href="#/">MATHIFY</a>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="me">
+      <span id="me-name"></span>
+      <button type="button" class="link-btn" id="logout">Sign out</button>
+    </div>
+  </header>
+  <main id="view" aria-live="polite"><p class="loading">Loading…</p></main>
+  <div id="toast" role="status" hidden></div>
+  <dialog id="modal"><form method="dialog" id="modal-form" novalidate></form></dialog>
+
+  <script src="/app/vendor/jspdf.umd.min.js" defer></script>
+  <script src="/app/app.js" defer></script>
+</body>
+</html>

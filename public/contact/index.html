@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/assets/gate.js"></script>
+  <title>Contact | Mathify</title>
+  <meta name="description" content="Contact Mathify — send an enquiry on WhatsApp or by email.">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-wrap" aria-label="Main">
+      <a class="brand" href="/welcome">MATHIFY</a>
+      <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+      <ul class="nav-menu"><li><a href="/why-maths">Why Maths!?</a></li><li class="dropdown"><button type="button" class="dd-btn" aria-haspopup="true" aria-expanded="false">About</button><ul class="dd-list"><li><a href="/about-mathify">Mathify</a></li><li><a href="/about-the-teacher">The Teacher</a></li></ul></li><li><a href="/fees-and-schedule">Fees and Schedule</a></li><li><a href="/testimonials">Testimonials</a></li><li><a href="/contact" aria-current="page">Contact</a></li><li><a class="nav-login" href="/app/">Login</a></li></ul>
+    </nav>
+  </header>
+  <main>
+    <div class="page">
+      <h1 class="page-title">Contact</h1>
+      <div class="card">
+        <div class="contact-direct">
+          <a class="pill" href="https://wa.me/919766072237" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.24-3.26-.68-2.75-1.09-4.5-3.9-4.63-4.08-.13-.18-1.1-1.47-1.1-2.8 0-1.33.7-1.99.95-2.26.24-.27.53-.34.71-.34h.51c.16 0 .38-.06.6.46.24.55.8 1.9.87 2.04.07.14.11.3.02.48-.09.18-.13.3-.27.46-.13.16-.28.36-.4.48-.13.13-.27.28-.12.55.16.27.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.34.27.13.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.6-.14.25.09 1.57.74 1.84.88.27.13.45.2.52.31.07.11.07.66-.17 1.33Z"/></svg> WhatsApp: +91 97660 72237</a>
+          <a class="pill" href="mailto:tanmaym88@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm9 7.2L4.4 7H4v.3l8 5.5 8-5.5V7h-.4L12 12.2Z"/></svg> tanmaym88@gmail.com</a>
+        </div>
+
+        <h2>Enquiry form</h2>
+        <p class="form-intro">Fields marked <span class="req">*</span> are needed; the rest help plan the classes.</p>
+        <form id="enquiry" novalidate>
+          <fieldset>
+            <legend>Student</legend>
+            <div class="form-grid">
+              <div>
+                <label for="f-student">Student's name <span class="req">*</span></label>
+                <input id="f-student" name="student" type="text" autocomplete="off" required>
+              </div>
+              <div>
+                <label for="f-gender">Student's gender</label>
+                <select id="f-gender" name="gender">
+                  <option value="">Select…</option>
+                  <option>Male</option><option>Female</option><option>Others</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-dob">Date of birth</label>
+                <input id="f-dob" name="dob" type="date">
+              </div>
+              <div>
+                <label for="f-grade">Grade / Year</label>
+                <input id="f-grade" name="grade" type="text" placeholder="e.g. 10th, Year 12">
+              </div>
+              <div class="full">
+                <label for="f-exams">Curriculum / target exams</label>
+                <input id="f-exams" name="exams" type="text" placeholder="e.g. IGCSE, CBSE, JEE, Olympiads">
+              </div>
+              <div class="full">
+                <label for="f-semail">Student's email</label>
+                <input id="f-semail" name="semail" type="email" autocomplete="off">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Parent</legend>
+            <div class="form-grid">
+              <div>
+                <label for="f-parent">Parent's name <span class="req">*</span></label>
+                <input id="f-parent" name="parent" type="text" autocomplete="name" required>
+              </div>
+              <div>
+                <label for="f-phone">Contact number (WhatsApp) <span class="req">*</span></label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 …" required>
+              </div>
+              <div class="full">
+                <label for="f-pemail">Parent's email</label>
+                <input id="f-pemail" name="pemail" type="email" autocomplete="email">
+              </div>
+              <div>
+                <label for="f-city">City / town</label>
+                <input id="f-city" name="city" type="text" autocomplete="address-level2">
+              </div>
+              <div>
+                <label for="f-country">Country</label>
+                <input id="f-country" name="country" type="text" autocomplete="country-name" placeholder="India">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Classes</legend>
+            <div class="form-grid">
+              <div class="full">
+                <span class="label">Objective of enrolling</span>
+                <div class="choices">
+                  <label><input type="radio" name="objective" value="Prepare for exams"> Prepare for exams</label>
+                  <label><input type="radio" name="objective" value="Learn Maths for fun / curiosity"> Learn Maths for fun / curiosity</label>
+                  <label><input type="radio" name="objective" value="Both"> Both</label>
+                  <label><input type="radio" name="objective" value="Other"> Other</label>
+                </div>
+              </div>
+              <div>
+                <label for="f-mode">Preferred mode</label>
+                <select id="f-mode" name="mode">
+                  <option value="">Select…</option>
+                  <option>Online</option>
+                  <option>Offline (Magarpatta, Pune)</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-hours">Hours per week</label>
+                <input id="f-hours" name="hours" type="number" min="1" max="20" step="1" inputmode="numeric" placeholder="e.g. 3">
+              </div>
+              <div>
+                <label for="f-days">Preferred days</label>
+                <input id="f-days" name="days" type="text" placeholder="e.g. Mon, Wed, Sat">
+              </div>
+              <div>
+                <label for="f-time">Preferred time (IST)</label>
+                <input id="f-time" name="time" type="text" placeholder="e.g. 5–7 pm">
+              </div>
+              <div>
+                <label for="f-level">How good is the student at Maths? (1–10)</label>
+                <select id="f-level" name="level">
+                  <option value="">Select…</option>
+                  <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                  <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-demo">Would you like a demo class?</label>
+                <select id="f-demo" name="demo">
+                  <option value="">Select…</option>
+                  <option>Yes</option><option>No</option>
+                </select>
+              </div>
+              <div class="full">
+                <label for="f-source">How did you come to know about Mathify?</label>
+                <select id="f-source" name="source">
+                  <option value="">Select…</option>
+                  <option>Word of mouth</option><option>WhatsApp</option><option>Facebook</option>
+                  <option>Pamphlet</option><option>Google search</option><option>Other</option>
+                </select>
+              </div>
+              <div class="full">
+                <label for="f-message">Anything else? <span class="opt">(optional)</span></label>
+                <textarea id="f-message" name="message" placeholder="Topics you need help with, upcoming exams…"></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="hp" aria-hidden="true"><label for="f-website">Leave this empty</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+          <div class="form-error" id="form-error" role="alert"></div>
+          <div class="send-row">
+            <button type="button" class="btn btn-wa" id="send-wa"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.24-3.26-.68-2.75-1.09-4.5-3.9-4.63-4.08-.13-.18-1.1-1.47-1.1-2.8 0-1.33.7-1.99.95-2.26.24-.27.53-.34.71-.34h.51c.16 0 .38-.06.6.46.24.55.8 1.9.87 2.04.07.14.11.3.02.48-.09.18-.13.3-.27.46-.13.16-.28.36-.4.48-.13.13-.27.28-.12.55.16.27.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.34.27.13.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.6-.14.25.09 1.57.74 1.84.88.27.13.45.2.52.31.07.11.07.66-.17 1.33Z"/></svg> Send on WhatsApp</button>
+            <a class="btn btn-mail" id="send-mail" href="mailto:tanmaym88@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm9 7.2L4.4 7H4v.3l8 5.5 8-5.5V7h-.4L12 12.2Z"/></svg> Send by Email</a>
+          </div>
+          <p class="form-note">Both buttons open your own WhatsApp or email app with the enquiry filled in — just press send there. A copy is also saved securely for Mathify to follow up; it is never shared.</p>
+        </form>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    © Mathify · Tanmay Mogra · Pune, India ·
+    <a href="https://wa.me/919766072237">WhatsApp</a> ·
+    <a href="mailto:tanmaym88@gmail.com">Email</a> ·
+    <a href="/feedback">Give feedback</a>
+  </footer>
+  <script src="/assets/nav.js"></script>
+  <script src="/assets/contact.js"></script>
+</body>
+</html>

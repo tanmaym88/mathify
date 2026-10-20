@@ -1,0 +1,5 @@
+SESSION_SECRET=change-me-to-a-long-random-string
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Allows /api/auth/dev?email=... on localhost only (for testing). Never set this in Cloudflare.
+DEV_LOGIN=1
