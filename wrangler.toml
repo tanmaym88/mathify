@@ -2,14 +2,12 @@ name = "mathify"
 compatibility_date = "2026-06-01"
 pages_build_output_dir = "public"
 
-# Database (Cloudflare D1). Switched off until the database exists, so the website can deploy now.
-# To switch on: create a D1 database named "mathify", then remove the "# " from the 5 lines below
-# and paste its Database ID.
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "mathify"
-# database_id = "PASTE_DATABASE_ID_HERE"
-# migrations_dir = "migrations"
+# Database (Cloudflare D1)
+[[d1_databases]]
+binding = "DB"
+database_name = "mathify"
+database_id = "f4a7de77-7866-4b35-b4c2-134105acaaed"
+migrations_dir = "migrations"
 
 [vars]
 # Comma-separated Google emails that get the admin dashboard.
