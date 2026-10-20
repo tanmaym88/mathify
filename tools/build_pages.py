@@ -212,7 +212,7 @@ page("/fees-and-schedule", "Fees and Schedule", "Mathify fees (charged per hour,
 
 # ---------------- Testimonials ----------------
 parents = [
-    ("He takes effort to build solid foundation for Students! He is very patient, polite and helpful! I liked the following things about him", "Vikas Johri", "Pune, India"),
+    ("He takes effort to build solid foundation for Students! He is very patient, polite and helpful!", "Vikas Johri", "Pune, India"),
     ("Please stay the way you are , your teaching style is great.", "Ujjwal Mahajan", "Pune, India"),
     ("Sir, apart from very knowledgeable, is Polite, patient and understanding. Key qualities that make an excellent teacher!", "Vibha Jain", "Mumbai, India (parent of Aarav, Grade 6)"),
     ("You are genuinely one of the best teachers Anika has had throughout her schooling, Tanmay! While this result, of course, isn’t the best, her confidence in Maths as a subject is largely down to your encouragement, patience and efforts. We are truly grateful for everything you have done for her. 😊 Honestly, she is happy- UCL is the 4th best university in the country and in the top 8 worldwide", "Komal Dharendra", "Salisbury, UK"),
