@@ -45,6 +45,15 @@ def page(path, title, description, body, current=None, extra_scripts=""):
   <script src="/assets/gate.js"></script>
   <title>{html.escape(full_title)}</title>
   <meta name="description" content="{html.escape(description)}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mathify">
+  <meta property="og:title" content="{html.escape(full_title)}">
+  <meta property="og:description" content="{html.escape(description)}">
+  <meta property="og:url" content="https://mathify.world{path}">
+  <meta property="og:image" content="https://mathify.world/brand/mathify-share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +64,7 @@ def page(path, title, description, body, current=None, extra_scripts=""):
 <body>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="Main">
-      <a class="brand" href="/welcome"><img class="brand-logo" src="/assets/logo.svg" alt="" width="32" height="44">MATHIFY</a>
+      <a class="brand" href="/welcome"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="146" height="40"></a>
       <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
       <ul class="nav-menu">{nav_html(current)}</ul>
     </nav>
