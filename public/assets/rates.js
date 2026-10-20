@@ -39,6 +39,22 @@
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
 
+  // Keep the table invisible while the sheet loads, so hidden rates never flash on screen.
+  // (If the sheet is slow or unreachable, the built-in rates appear after a few seconds.)
+  table.classList.add('rates-loading');
+  var shown = false;
+  function reveal() { if (!shown) { shown = true; table.classList.remove('rates-loading'); } }
+  var failSafe = setTimeout(reveal, 4000);
+
+  function hideAll() {
+    table.hidden = true;
+    var note = document.createElement('p');
+    note.className = 'fees-on-request';
+    note.innerHTML = 'Fees are shared on request. Please <a href="https://wa.me/919766072237" target="_blank" rel="noopener">WhatsApp</a> or use the <a href="/contact">contact form</a>.';
+    table.parentNode.insertBefore(note, table);
+    table.setAttribute('data-source', 'sheet-hidden');
+  }
+
   fetch(URL, { cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
     .then(function (text) {
@@ -53,12 +69,14 @@
         body.push('<tr><th scope="row">' + esc(r[0]) + '</th><td>' + money(r[1]) +
                   '</td><td>' + money(r[2]) + '</td><td>' + money(r[3]) + '</td></tr>');
       });
-      if (!body.length) return;
+      clearTimeout(failSafe);
+      if (!body.length) { hideAll(); shown = true; return; }   // every row set to "No": hide the table
       table.querySelector('tbody').innerHTML = body.join('');
       if (effective) {
         table.querySelector('caption').textContent = 'Hourly rates in INR, with effect from ' + effective;
       }
       table.setAttribute('data-source', 'sheet');
+      reveal();
     })
-    .catch(function () { /* keep the built-in rates */ });
+    .catch(function () { clearTimeout(failSafe); reveal(); /* keep the built-in rates */ });
 })();

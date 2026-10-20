@@ -128,7 +128,7 @@ with sync_playwright() as p:
     ok("/feedback open without solving puzzle", urllib.parse.urlparse(fp.url).path == "/feedback/", fp.url)
     ok("feedback links to both Google Forms", fp.locator("a[href*='docs.google.com/forms']").count() == 2)
     fresh.close()
-    page.goto(B + "/fees-and-schedule/")
+    page.goto(B + "/fees-and-schedule/"); page.wait_for_function("!document.querySelector('table.fees').classList.contains('rates-loading')", timeout=6000)
     ok("fees table shows built-in rates", all(x in page.inner_text("table.fees") for x in ["₹600", "₹900", "₹2,500", "₹1,300", "₹3,500"]))
     # live update from sheet (mocked CSV)
     csv = 'Grade,Offline,Online India,Online Intl,Show\nGrades 9–10,850,950,2600,Yes\nHidden row,1,2,3,No\n"JEE, Olympiad",1250,1350,3600,Yes\nEffective from,1 December 2026,,,\n'
@@ -140,6 +140,17 @@ with sync_playwright() as p:
     ctx.route("**/gviz/tq**", lambda r: r.fulfill(status=200, content_type="text/html", body="<html>Sign in</html>"))
     page.goto(B + "/fees-and-schedule/"); page.wait_for_timeout(800)
     ok("unshared sheet falls back to built-in rates", "₹2,500" in page.inner_text("table.fees"))
+    ctx.unroute("**/gviz/tq**")
+    # every row "No" in the sheet -> no rates anywhere, "on request" note instead, and no flash while loading
+    allno = 'Grade,Offline,Online India,Online Intl,Show\nGrades 6–8,600,700,2000,No\nGrades 9–10,800,900,2500,No\nEffective from,1 November 2026,,,\n'
+    def slow_allno(r):
+        import time; time.sleep(0.6); r.fulfill(status=200, content_type="text/csv", body=allno)
+    ctx.route("**/gviz/tq**", slow_allno)
+    page.goto(B + "/fees-and-schedule/", wait_until="domcontentloaded")
+    ok("rates invisible while the sheet loads (no flash)", page.evaluate("getComputedStyle(document.querySelector('table.fees')).visibility") == "hidden")
+    page.wait_for_selector("table.fees[data-source=sheet-hidden]", state="attached", timeout=6000)
+    ok("all rows 'No': fee table hidden", not page.is_visible("table.fees"))
+    ok("all rows 'No': 'fees on request' note shown", page.is_visible(".fees-on-request") and "₹" not in page.inner_text("main"))
     ctx.unroute("**/gviz/tq**")
     page.goto(B + "/testimonials/")
     ok("ratings block shows 6 stats", page.locator(".stat").count() == 6)
