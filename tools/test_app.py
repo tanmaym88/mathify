@@ -148,6 +148,20 @@ with sync_playwright() as p:
     pg.click(".tabs >> text=Students"); pg.wait_for_selector("#search")
     pg.fill("#search", "zzz"); ok("search filters", pg.locator("#rows tr").count() == 0)
     pg.fill("#search", "ishaan"); ok("search finds student", pg.locator("#rows tr").count() == 1)
+    # fee change -> offer to re-price classes in unpaid months (paid/part-paid months untouched)
+    before = {m["month"]: m["amount"] for m in pg.request.get(B + f"/api/students/{sid}/fees").json()["months"]}
+    pg.goto(B + f"/app/#/students/{sid}/edit"); pg.wait_for_selector("#f-fee_per_hour")
+    pg.fill("#f-fee_per_hour", "1000"); pg.click("#save"); pg.wait_for_selector("text=Apply the new fee to earlier classes?")
+    ok("fee change offers to update unpaid classes", "October 2026" in pg.inner_text("#modal-form") or "unpaid months" in pg.inner_text("#modal-form"))
+    pg.click("#modal-form button[value=ok]"); pg.wait_for_timeout(1200)
+    after = {m["month"]: m["amount"] for m in pg.request.get(B + f"/api/students/{sid}/fees").json()["months"]}
+    unpaid = [m for m in after if after[m] != before.get(m)]
+    ok("unpaid month re-priced, part-paid September untouched", after.get("2026-09") == before.get("2026-09") and len(unpaid) >= 1, (before, after))
+    pg.goto(B + f"/app/#/students/{sid}/edit"); pg.wait_for_selector("#f-fee_per_hour")
+    pg.fill("#f-fee_per_hour", "800"); pg.click("#save"); pg.wait_for_selector("text=Apply the new fee to earlier classes?")
+    pg.click("#modal-form button[value=cancel]"); pg.wait_for_timeout(800)
+    after2 = {m["month"]: m["amount"] for m in pg.request.get(B + f"/api/students/{sid}/fees").json()["months"]}
+    ok("choosing 'only new classes' leaves earlier classes as they were", after2 == after, (after, after2))
     # admin "Student view" preview = exactly the student/parent page, read-only
     pg.goto(B + f"/app/#/students/{sid}/attendance"); pg.wait_for_selector("text=Student view")
     pg.click("text=Student view"); pg.wait_for_selector(".preview-banner")

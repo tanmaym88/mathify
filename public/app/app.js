@@ -377,9 +377,28 @@
             : await api('/students', { method: 'POST', body: data });
           toast(id ? 'Saved' : 'Student added');
           location.hash = '#/students/' + r.student.id;
+          if (id && data.fee_per_hour != null && data.fee_per_hour !== s.fee_per_hour) offerRateUpdate(id, data.fee_per_hour);
         } catch (err) { $('#ferr').textContent = err.message; }
       });
     };
+  }
+
+  // After a fee change: offer to re-price classes in months with no payment recorded yet.
+  // Months with any payment (full or part) are never touched, so sent/paid invoices stay as they were.
+  async function offerRateUpdate(sid, fee) {
+    const [{ attendance }, { months }] = await Promise.all([api(`/students/${sid}/attendance`), api(`/students/${sid}/fees`)]);
+    const paid = new Set(months.filter(m => m.paid).map(m => m.month));
+    const targets = attendance.filter(a => !paid.has(a.date.slice(0, 7)) && a.rate !== fee);
+    if (!targets.length) return;
+    const monthsList = [...new Set(targets.map(a => monthName(a.date.slice(0, 7))))].join(', ');
+    openModal(`<h2>Apply the new fee to earlier classes?</h2>
+      <p>${targets.length} class${targets.length > 1 ? 'es' : ''} in unpaid months (${esc(monthsList)}) ${targets.length > 1 ? 'were' : 'was'} recorded at the old rate.</p>
+      <p class="hint">Months already marked paid are not changed.</p>
+      <div class="modal-actions"><button class="btn secondary" value="cancel">No, only new classes</button>
+      <button class="btn" value="ok">Yes, charge ${inr(fee)}/hour</button></div>`, async () => {
+      for (const a of targets) await api('/attendance/' + a.id, { method: 'PUT', body: { rate: fee } });
+      toast(`Updated ${targets.length} class${targets.length > 1 ? 'es' : ''} to ${inr(fee)}/hour`); router();
+    });
   }
 
   /* ============ admin: one student ============ */
