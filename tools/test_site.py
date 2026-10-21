@@ -24,10 +24,13 @@ with sync_playwright() as p:
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
 
-    # 1. gate: locked page bounces to puzzle
+    # 1. puzzle is optional: pages open directly, and the home page offers a skip link
     page.goto(B + "/welcome/")
     page.wait_for_load_state("load")
-    ok("locked /welcome redirects to puzzle", urllib.parse.urlparse(page.url).path == "/", page.url)
+    ok("/welcome opens without solving the puzzle", urllib.parse.urlparse(page.url).path == "/welcome/", page.url)
+    page.goto(B + "/"); page.wait_for_load_state("load")
+    page.click("text=Skip the test and go to the website"); page.wait_for_load_state("load")
+    ok("skip link goes to the website", urllib.parse.urlparse(page.url).path.startswith("/welcome"), page.url)
 
     # 2. puzzle renders with 9 loaded images
     page.goto(B + "/")

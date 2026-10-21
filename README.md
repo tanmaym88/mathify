@@ -73,6 +73,7 @@ Under **Cloudflare → your Pages project → Settings → Variables and secrets
 - **Fee table on the website:** edit the *Mathify – Website Rates* Google Sheet. No code change needed.
 - **Add another admin:** add their email to `ADMIN_EMAILS` in `wrangler.toml`.
 - **Website pages:** edit `tools/build_pages.py` (shared header/footer) and run `npm run build:pages`, or edit the HTML directly.
+- **Home-page puzzle:** optional (visitors can skip it). To make it compulsory again, set `REQUIRED = true` at the top of `public/assets/gate.js`.
 - **After any HTML/CSS/JS change:** run `npm run build:pages` (or `python3 tools/stamp_assets.py public`). It adds version tags (`?v=…`) to CSS/JS links so visitors get the new files immediately; Cloudflare otherwise lets browsers keep old copies for 4 hours.
 
 ## Local development

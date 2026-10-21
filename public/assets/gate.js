@@ -2,6 +2,8 @@
    Visitors must solve the counting puzzle on the home page before other pages open.
    Load this in <head> (not deferred) so locked pages never flash. */
 (function () {
+  var REQUIRED = false;                     // false = the puzzle is optional; set true to make visitors solve it first
+  if (!REQUIRED) return;
   var HOME = '/';                          // the puzzle page
   var ALWAYS_OPEN = ['/feedback', '/login', '/app', '/privacy', '/terms']; // pages anyone may open without solving (edit or empty this list)
   var UNLOCK_KEY = 'mathifyUnlocked';      // must match assets/puzzle.js
