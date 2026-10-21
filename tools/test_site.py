@@ -166,6 +166,12 @@ with sync_playwright() as p:
     mp.screenshot(path=f"{OUT}/puzzle_mobile.png")
     no_hscroll = mp.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
     ok("mobile puzzle no horizontal scroll", no_hscroll)
+    # login reachable without solving the puzzle
+    lc = br.new_context(); lp = lc.new_page(); lp.goto(B + "/"); lp.wait_for_load_state("load")
+    ok("puzzle page has a Login button", lp.locator("a.cop-login[href='/app/']").is_visible())
+    lp.click("a.cop-login"); lp.wait_for_selector(".login, .topbar", state="attached", timeout=8000)
+    ok("Login opens the app sign-in without solving the puzzle", "/app/" in lp.url, lp.url)
+    lc.close()
     # 7a. phones: whole puzzle fits on screen, empty areas scroll, puzzle solvable
     for vw, vh in [(375, 667), (390, 664), (360, 640)]:
         pc = br.new_context(viewport={"width": vw, "height": vh}, is_mobile=True, has_touch=True)

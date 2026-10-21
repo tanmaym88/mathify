@@ -55,6 +55,8 @@
          font-size: 24px; line-height: 48px; text-align: center; text-decoration: none; cursor: pointer; display: inline-block; padding: 0; margin: 4px; }
     .cop-icon:hover { filter: brightness(1.1); }
     #cop .cop-skip { display: none; }
+    #cop .cop-login { background: #2f3192; color: #fff; font-weight: 700; text-decoration: none; padding: 9px 16px; border-radius: 8px; font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 1rem; line-height: 1.2; }
+    #cop .cop-login:hover { background: #22246e; }
     #cop .cop-title { margin: 4px 16px 6px; text-align: center; color: #2f3192; font-weight: 900; font-size: clamp(1.15rem, 3.2vw, 1.9rem); line-height: 1.25; text-wrap: balance; font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
     #cop .cop-logo { margin-right: auto; display: block; }
     #cop .cop-logo img { height: 48px; width: auto; display: block; }
@@ -74,6 +76,7 @@
   <div id="cop">
     <div class="cop-bar">
       <a class="cop-logo" href="/welcome"><img src="/brand/mathify-logo-horizontal.svg?v=bd13eab71a" alt="Mathify" width="175" height="48"></a>
+      <a class="cop-login" href="/app/">Login</a>
       <button type="button" class="cop-icon" id="cop-shuffle" aria-label="Shuffle" title="Shuffle">↻</button>
       <a class="cop-icon cop-skip" id="cop-skip" href="/welcome" aria-label="Continue" title="Continue">→</a>
       <span id="cop-msg" hidden></span>
