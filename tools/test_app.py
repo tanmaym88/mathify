@@ -83,14 +83,22 @@ with sync_playwright() as p:
     # ---------- 5. today: start + end class ----------
     pg.click(".tabs >> text=Today"); pg.wait_for_selector("[data-start-class]")
     ok("today lists scheduled class", "Ishaan Rao" in pg.inner_text("main") and "17:00–18:00" in pg.inner_text("main"))
-    pg.click("[data-start-class]"); pg.wait_for_selector("text=In progress")
+    pg.click("[data-start-class]"); pg.wait_for_selector("#m-start")
+    ok("start class asks for time (pre-filled with now)", len(pg.input_value("#m-start")) == 5)
+    pg.fill("#m-start", "06:10"); pg.click("#modal-form button[value=ok]"); pg.wait_for_selector("[data-end]")
+    ok("class started at the edited time", "Started 06:10" in pg.inner_text("main"))
     pg.screenshot(path=f"{SHOTS}/admin_today.png", full_page=True)
-    pg.click("[data-end]")
-    start = pg.inner_text("#modal-form .sub").split("at ")[1].rstrip(".")
-    h, m = map(int, start.split(":"))
-    end_min = min(h * 60 + m + 75, 23 * 60 + 59)
-    pg.fill("#m-end", f"{end_min // 60:02d}:{end_min % 60:02d}")
-    pg.click("#modal-form button[value=ok]"); pg.wait_for_selector("text=Done")
+    pg.click("[data-restart]"); pg.wait_for_selector("#m-start")
+    pg.fill("#m-start", "06:00"); pg.click("#modal-form button[value=ok]"); pg.wait_for_selector("text=Started 06:00")
+    ok("start time of a running class can be changed", "Started 06:00" in pg.inner_text("main"))
+    pg.click("[data-end]"); pg.wait_for_selector("#m-end")
+    ok("end class shows editable start time", pg.input_value("#m-start") == "06:00")
+    pg.fill("#m-start", "06:05"); pg.fill("#m-end", "05:30"); pg.click("#modal-form button[value=ok]"); pg.wait_for_timeout(500)
+    ok("end before start rejected", "after start" in pg.inner_text("#modal-form"))
+    pg.fill("#m-end", "07:20"); pg.click("#modal-form button[value=ok]"); pg.wait_for_selector("text=Done")
+    att = pg.request.get(B + "/api/students/1/attendance").json()["attendance"]
+    today_row = [x for x in att if x["start_time"] == "06:05"]
+    ok("edited start/end saved, hours recalculated (1.25)", today_row and today_row[0]["end_time"] == "07:20" and today_row[0]["hours"] == 1.25, att[:2])
     ok("class ended and marked done", pg.locator(".badge.green", has_text="Done").count() == 1)
 
     # ---------- 6. past classes: present, late cancel, absent; overlap rejected ----------

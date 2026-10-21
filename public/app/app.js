@@ -168,7 +168,8 @@
       ${d.in_progress.length ? `<div class="card"><h2>In progress</h2>${d.in_progress.map(o => `
         <div class="list-item">
           <div><strong><a href="#/students/${o.student_id}">${esc(o.name)}</a></strong><br><span class="hint">Started ${esc(o.start_time)}${o.date !== d.today ? ' on ' + esc(niceDate(o.date)) : ''}</span></div>
-          <button class="btn green" data-end="${o.id}" data-start="${esc(o.start_time)}">End class</button>
+          <div class="row"><button class="btn small secondary" data-restart="${o.id}" data-start="${esc(o.start_time)}">Change start</button>
+          <button class="btn green" data-end="${o.id}" data-start="${esc(o.start_time)}">End class</button></div>
         </div>`).join('')}</div>` : ''}
       <div class="card"><h2>Today's schedule</h2>
         ${d.today_classes.length ? d.today_classes.map(c => `
@@ -189,21 +190,43 @@
           </div>`).join('') : '<p class="empty">Nothing due. 🎉</p>'}
       </div>`;
     $$('[data-end]').forEach(b => b.onclick = () => endClassModal(Number(b.dataset.end), b.dataset.start));
-    $$('[data-start-class]').forEach(b => b.onclick = () => act(b, async () => {
-      const t = nowIST();
-      await api(`/students/${b.dataset.startClass}/attendance`, { method: 'POST', body: { date: t.date, start_time: t.time } });
-      toast('Class started at ' + t.time); router();
-    }));
+    $$('[data-restart]').forEach(b => b.onclick = () => changeStartModal(Number(b.dataset.restart), b.dataset.start));
+    $$('[data-start-class]').forEach(b => b.onclick = () => startClassModal(Number(b.dataset.startClass)));
     $$('[data-mark]').forEach(b => b.onclick = () => attendanceModal(Number(b.dataset.mark), null, { date: d.today, start_time: b.dataset.from, end_time: b.dataset.to, is_present: 0 }));
   }
 
+  // Start: time pre-filled with "now" (IST), editable before saving.
+  function startClassModal(sid) {
+    const t = nowIST();
+    openModal(`<h2>Start class</h2><p class="sub">Change the time if the class actually began earlier or later.</p>
+      <label for="m-start">Start time</label><input id="m-start" name="start_time" type="time" value="${t.time}" required>
+      ${modalButtons('Start class')}`, async fd => {
+      await api(`/students/${sid}/attendance`, { method: 'POST', body: { date: t.date, start_time: fd.get('start_time') } });
+      toast('Class started at ' + fd.get('start_time')); router();
+    });
+  }
+
+  // End: both start and end editable; hours and fees are recalculated from these.
   function endClassModal(id, start) {
     const t = nowIST();
     openModal(`<h2>End class</h2><p class="sub">Started at ${esc(start)}.</p>
-      <label for="m-end">End time</label><input id="m-end" name="end_time" type="time" value="${t.time}" required>
+      <div class="fields">
+        <div><label for="m-start">Start time</label><input id="m-start" name="start_time" type="time" value="${esc(start)}" required></div>
+        <div><label for="m-end">End time</label><input id="m-end" name="end_time" type="time" value="${t.time}" required></div>
+      </div>
       ${modalButtons('End class')}`, async fd => {
-      await api(`/attendance/${id}/end`, { method: 'POST', body: { end_time: fd.get('end_time') } });
+      if (!fd.get('end_time')) throw new Error('Set the end time');
+      await api(`/attendance/${id}`, { method: 'PUT', body: { start_time: fd.get('start_time'), end_time: fd.get('end_time') } });
       toast('Class ended'); router();
+    });
+  }
+
+  function changeStartModal(id, start) {
+    openModal(`<h2>Change start time</h2>
+      <label for="m-start">Start time</label><input id="m-start" name="start_time" type="time" value="${esc(start)}" required>
+      ${modalButtons('Save')}`, async fd => {
+      await api(`/attendance/${id}`, { method: 'PUT', body: { start_time: fd.get('start_time') } });
+      toast('Start time changed to ' + fd.get('start_time')); router();
     });
   }
 
@@ -409,11 +432,7 @@
       </div>`;
     if (!admin) return;
     if (open) $('#end-open').onclick = () => endClassModal(open.id, open.start_time);
-    else $('#start-now').onclick = e => act(e.target, async () => {
-      const t = nowIST();
-      await api(`/students/${s.id}/attendance`, { method: 'POST', body: { date: t.date, start_time: t.time } });
-      toast('Class started at ' + t.time); router();
-    });
+    else $('#start-now').onclick = () => startClassModal(s.id);
     $('#add-past').onclick = () => attendanceModal(s.id, null, { date: nowIST().date, is_present: 1 });
     $$('[data-edit]').forEach(b => b.onclick = () => attendanceModal(s.id, attendance.find(a => a.id === Number(b.dataset.edit))));
     $$('[data-del]').forEach(b => b.onclick = () => {
