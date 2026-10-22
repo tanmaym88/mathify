@@ -31,7 +31,7 @@ with sync_playwright() as p:
     vp.fill("#f-student", "Ishaan Rao"); vp.fill("#f-parent", "Kavya Rao"); vp.fill("#f-phone", "98200 11111")
     vp.fill("#f-grade", "10th"); vp.fill("#f-exams", "IGCSE"); vp.select_option("#f-mode", "Offline (Magarpatta, Pune)")
     vp.fill("#f-hours", "3"); vp.fill("#f-semail", "ishaan.rao@gmail.com"); vp.fill("#f-pemail", "kavya.rao@gmail.com")
-    vp.fill("#f-dob", "2010-06-01"); vp.fill("#f-sphone", "90000 22222"); vp.fill("#f-saddr1", "C-4, Iris"); vp.fill("#f-city", "Pune"); vp.fill("#f-spostal", "411028")
+    vp.select_option("#f-gender", "Male"); vp.fill("#f-dob", "2010-06-01"); vp.fill("#f-sphone", "90000 22222"); vp.fill("#f-saddr1", "C-4, Iris"); vp.fill("#f-city", "Pune"); vp.fill("#f-spostal", "411028")
     with vp.expect_response(lambda r: "/api/enquiries" in r.url) as resp:
         vp.click("#send-wa")
     ok("website enquiry saved to app", resp.value.status == 201, resp.value.status)

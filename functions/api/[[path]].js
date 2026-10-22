@@ -481,13 +481,15 @@ route('POST', '/api/enquiries', async ({ env, request }) => {
   for (const k of ENQ_FIELDS) { const v = str(b[k], k === 'message' ? 2000 : 200); if (v) data[k] = v; }
   // Same rules as the website form (assets/contact.js)
   if (!data.student) bad("Student's name is required");
+  if (!['Male', 'Female', 'Others'].includes(data.gender)) bad("Student's gender is required");
+  if (digits(data.sphone) < 8) bad("Student's contact number is required");
   const age = ageOn(data.dob);
   if (age === null || age < 2 || age > 100) bad("A valid date of birth is required");
   if (!GMAIL.test(data.semail || '')) bad("The student's email must be a Gmail address");
   if (data.pemail && !GMAIL.test(data.pemail)) bad("The parent/guardian's email must be a Gmail address");
   if (age < 18) {
     if (!data.parent || digits(data.phone) < 8 || !data.pemail) bad("Parent/guardian's name, WhatsApp number and Gmail are required for students under 18");
-  } else if (digits(data.phone) < 8 && digits(data.sphone) < 8) bad('A contact number is required');
+  }
   const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM enquiries WHERE created_at > datetime('now','-1 hour')").first();
   if (recent.n >= 30) throw new HttpError(429, 'Too many enquiries right now — please WhatsApp instead.');
   await env.DB.prepare('INSERT INTO enquiries (data) VALUES (?)').bind(JSON.stringify(data)).run();

@@ -1,9 +1,8 @@
 /* Enquiry form: builds the enquiry and opens WhatsApp or the visitor's email app,
    and saves a copy to the Mathify app (Enquiries tab).
    Rules (also enforced on the server, functions/api/[[path]].js):
-   - student's name, date of birth and Gmail address are required;
-   - parent/guardian name, WhatsApp number and Gmail are required unless the student is 18+;
-   - for an 18+ student with no parent/guardian number, the student's contact number is required. */
+   - student's name, gender, date of birth, Gmail address and contact number are required;
+   - parent/guardian name, WhatsApp number and Gmail are required unless the student is 18+. */
 (function () {
   var WHATSAPP_NUMBER = '919766072237';     // country code + number, digits only
   var EMAIL = 'tanmaym88@gmail.com';
@@ -38,11 +37,9 @@
     document.getElementById('adult-note').hidden = !adult;
     Array.prototype.forEach.call(document.querySelectorAll('.preq'), function (s) { s.hidden = adult; });
     ['parent', 'phone', 'pemail'].forEach(function (n) { form.elements[n].required = !adult; });
-    document.getElementById('sphone-req').hidden = !(adult && !val('phone'));
   }
   dobEl.addEventListener('input', updateParentRules);
   dobEl.addEventListener('change', updateParentRules);
-  form.elements.phone.addEventListener('input', updateParentRules);
 
   // Parent/guardian address: hidden while "Same as the student's address" is ticked.
   var same = form.elements.psame, paddr = document.getElementById('paddr');
@@ -150,18 +147,17 @@
   function check() {
     err.textContent = '';
     if (!val('student')) return fail("Please enter the student's name.", 'student');
+    if (!val('gender')) return fail("Please select the student's gender.", 'gender');
     var a = age(val('dob'));
     if (a === null) return fail("Please enter the student's date of birth.", 'dob');
     if (a < 2 || a > 100) return fail('Please check the date of birth.', 'dob');
     if (!val('semail')) return fail("Please enter the student's Gmail address (it's used to sign in to the Mathify app).", 'semail');
     if (!GMAIL.test(val('semail'))) return fail("The student's email must be a Gmail address (ending in @gmail.com).", 'semail');
-    if (val('sphone') && val('sphone').replace(/\D/g, '').length < 8) return fail("The student's contact number looks too short.", 'sphone');
+    if (val('sphone').replace(/\D/g, '').length < 8) return fail("Please enter the student's contact number.", 'sphone');
     if (a < 18) {
       if (!val('parent')) return fail("Please enter the parent/guardian's name.", 'parent');
       if (val('phone').replace(/\D/g, '').length < 8) return fail("Please enter the parent/guardian's WhatsApp number so Tanmay can reply.", 'phone');
       if (!val('pemail')) return fail("Please enter the parent/guardian's Gmail address.", 'pemail');
-    } else if (val('phone').replace(/\D/g, '').length < 8 && val('sphone').replace(/\D/g, '').length < 8) {
-      return fail("Please enter a contact number (the student's or a parent/guardian's) so Tanmay can reply.", 'sphone');
     }
     if (val('pemail') && !GMAIL.test(val('pemail'))) return fail("The parent/guardian's email must be a Gmail address (ending in @gmail.com).", 'pemail');
     return true;

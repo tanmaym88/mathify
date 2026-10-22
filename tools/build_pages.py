@@ -362,8 +362,8 @@ contact = f"""    <div class="page">
                 <input id="f-student" name="student" type="text" autocomplete="off" required>
               </div>
               <div>
-                <label for="f-gender">Student's gender</label>
-                <select id="f-gender" name="gender">
+                <label for="f-gender">Student's gender <span class="req">*</span></label>
+                <select id="f-gender" name="gender" required>
                   <option value="">Select…</option>
                   <option>Male</option><option>Female</option><option>Others</option>
                 </select>
@@ -382,8 +382,8 @@ contact = f"""    <div class="page">
                 <span class="field-hint">Used to sign in to the Mathify app — must be a Gmail address.</span>
               </div>
               <div>
-                <label for="f-sphone">Student's contact number <span class="req" id="sphone-req" hidden>*</span></label>
-                <input id="f-sphone" name="sphone" type="tel" autocomplete="off" inputmode="tel" placeholder="+91 …">
+                <label for="f-sphone">Student's contact number <span class="req">*</span></label>
+                <input id="f-sphone" name="sphone" type="tel" autocomplete="off" inputmode="tel" placeholder="+91 …" required>
               </div>
               <div class="full"><span class="subhead">Student's address</span></div>
               <div class="full">
