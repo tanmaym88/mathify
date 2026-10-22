@@ -120,8 +120,6 @@ const STUDENT_FIELDS = {
   grade: v => str(v, 40), exams: v => str(v, 200), mode: v => str(v, 40),
   hours_per_week: v => num(v, { max: 40 }), maths_level: v => num(v, { min: 1, max: 10, int: true }),
   objective: v => str(v, 120), city: v => str(v, 80), country: v => str(v, 80),
-  student_phone: v => str(v, 40), address_line1: v => str(v, 160), address_line2: v => str(v, 160),
-  state: v => str(v, 80), postal_code: v => str(v, 20), parent_address: v => str(v, 400),
   fee_per_hour: v => num(v, { max: 100000, int: true }), notes: v => str(v, 2000),
   is_active: v => (v === undefined ? undefined : (v ? 1 : 0))
 };
@@ -135,6 +133,7 @@ function pickStudent(input, { partial }) {
     if (v !== undefined) out[k] = v;
   }
   if ('schedule' in input) out.schedule = JSON.stringify(cleanSchedule(input.schedule));
+  if ('details' in input) out.details = JSON.stringify(cleanDetails(input.details));
   if (!partial || 'name' in out) if (!out.name) bad("Student's name is required");
   if (!partial || 'email' in out) if (!emailOk(out.email)) bad("A valid student Google email is required (used to sign in)");
   if (out.parent_email && !emailOk(out.parent_email)) bad('Parent email is not valid');
@@ -142,7 +141,22 @@ function pickStudent(input, { partial }) {
   return out;
 }
 
-const parseStudent = r => r && ({ ...r, schedule: JSON.parse(r.schedule || '{}'), is_active: !!r.is_active });
+// Flexible extra fields (address, student's phone, …): any short text values under simple keys.
+// New form fields need no server or database change.
+function cleanDetails(d) {
+  if (d == null || d === '') return {};
+  if (typeof d !== 'object' || Array.isArray(d)) bad('Invalid details');
+  const out = {};
+  for (const [k, v] of Object.entries(d)) {
+    if (!/^[a-z][a-z0-9_]{0,39}$/.test(k)) bad('Invalid detail name: ' + k);
+    const t = str(v, 500);
+    if (t) out[k] = t;
+  }
+  if (Object.keys(out).length > 40) bad('Too many details');
+  return out;
+}
+const parseJSON = (t, fallback) => { try { return JSON.parse(t); } catch { return fallback; } };
+const parseStudent = r => r && ({ ...r, schedule: parseJSON(r.schedule || '{}', {}), details: parseJSON(r.details || '{}', {}), is_active: !!r.is_active });
 
 async function getStudent(env, sid) {
   const r = await env.DB.prepare('SELECT * FROM students WHERE id = ?').bind(sid).first();
@@ -505,9 +519,11 @@ route('POST', '/api/enquiries/:id/convert', async ({ user, env, params, request 
     hours_per_week: parseFloat(d.hours) > 0 && parseFloat(d.hours) <= 40 ? parseFloat(d.hours) : null,
     maths_level: parseInt(d.level) >= 1 && parseInt(d.level) <= 10 ? parseInt(d.level) : null,
     objective: d.objective, city: d.city, country: d.country,
-    student_phone: d.sphone, address_line1: d.saddr1, address_line2: d.saddr2, state: d.sstate, postal_code: d.spostal,
-    parent_address: d.psame ? (d.parent || d.phone ? 'Same as student' : null)
-      : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', ') || null
+    details: {
+      student_phone: d.sphone, address_line1: d.saddr1, address_line2: d.saddr2, state: d.sstate, postal_code: d.spostal,
+      parent_address: d.psame ? (d.parent || d.phone ? 'Same as student' : '')
+        : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', ')
+    }
   };
   for (const k of Object.keys(fromEnquiry)) if (fromEnquiry[k] == null || fromEnquiry[k] === '') delete fromEnquiry[k];
   if (fromEnquiry.mode) fromEnquiry.mode = /offline/i.test(fromEnquiry.mode) ? 'Offline' : /online/i.test(fromEnquiry.mode) ? 'Online' : fromEnquiry.mode;

@@ -267,21 +267,26 @@
   const FIELD_DEFS = [
     ['name', "Student's name *", 'text'], ['email', "Student's Google email * (to sign in)", 'email'],
     ['parent_name', "Parent's name", 'text'], ['parent_email', "Parent's Google email (can also sign in)", 'email'],
-    ['phone', 'Parent/guardian WhatsApp', 'tel'], ['student_phone', "Student's contact number", 'tel'],
-    ['fee_per_hour', 'Fee per hour (₹) *', 'number'],
+    ['phone', 'Parent/guardian WhatsApp', 'tel'], ['fee_per_hour', 'Fee per hour (₹) *', 'number'],
     ['grade', 'Grade / Year', 'text'], ['exams', 'Curriculum / target exams', 'text'],
     ['mode', 'Mode', 'select:Online,Offline'], ['hours_per_week', 'Hours per week', 'number'],
     ['dob', 'Date of birth', 'date'], ['gender', 'Gender', 'select:Male,Female,Others'],
-    ['address_line1', 'Address line 1', 'text'], ['address_line2', 'Address line 2', 'text'],
-    ['city', 'City', 'text'], ['state', 'State / province / region', 'text'],
-    ['postal_code', 'Postal / ZIP code', 'text'], ['country', 'Country', 'text'],
-    ['parent_address', "Parent/guardian's address", 'text'],
+    ['city', 'City', 'text'], ['country', 'Country', 'text'],
     ['objective', 'Objective', 'text'], ['maths_level', 'Maths level (1–10)', 'number']
+  ];
+  // Flexible fields, stored in the student's "details" (no database change needed).
+  // To add a field: add one line here — [key (lowercase_with_underscores), label, input type].
+  const DETAIL_DEFS = [
+    ['student_phone', "Student's contact number", 'tel'],
+    ['address_line1', 'Address line 1', 'text'], ['address_line2', 'Address line 2', 'text'],
+    ['state', 'State / province / region', 'text'], ['postal_code', 'Postal / ZIP code', 'text'],
+    ['parent_address', "Parent/guardian's address", 'text']
   ];
 
   function studentFields(s = {}) {
-    const field = ([k, label, type]) => {
-      const v = s[k] ?? '';
+    const details = s.details || {};
+    const field = ([k, label, type], isDetail) => {
+      const v = (isDetail ? details[k] : s[k]) ?? '';
       let input;
       if (type.startsWith('select:')) {
         const opts = type.slice(7).split(',');
@@ -294,7 +299,7 @@
     };
     const sched = s.schedule || {};
     return `
-      <div class="fields">${FIELD_DEFS.map(field).join('')}</div>
+      <div class="fields">${FIELD_DEFS.map(d => field(d, false)).join('')}${DETAIL_DEFS.map(d => field(d, true)).join('')}</div>
       <h2 style="margin-top:20px">Weekly schedule</h2>
       <div class="schedule-grid">${DAYS.map(d => `
         <label><input type="checkbox" name="day-${d}" ${sched[d] ? 'checked' : ''}> ${d}</label>
@@ -309,6 +314,8 @@
     const fd = new FormData(form);
     const out = {};
     for (const [k] of FIELD_DEFS) out[k] = fd.get(k) ?? '';
+    out.details = {};
+    for (const [k] of DETAIL_DEFS) { const v = (fd.get(k) || '').trim(); if (v) out.details[k] = v; }
     out.notes = fd.get('notes') || '';
     for (const k of ['fee_per_hour', 'hours_per_week', 'maths_level']) out[k] = out[k] === '' ? null : Number(out[k]);
     const schedule = {};
@@ -337,10 +344,12 @@
       mode: /offline/i.test(d.mode || '') ? 'Offline' : /online/i.test(d.mode || '') ? 'Online' : '',
       hours_per_week: hours > 0 && hours <= 40 ? hours : '', dob: /^\d{4}-\d{2}-\d{2}$/.test(d.dob || '') ? d.dob : '',
       gender, city: d.city || '', country: d.country || '', objective: d.objective || '',
-      student_phone: d.sphone || '', address_line1: d.saddr1 || '', address_line2: d.saddr2 || '', state: d.sstate || '',
-      postal_code: d.spostal || '',
-      parent_address: d.psame ? ((d.parent || d.phone) ? 'Same as student' : '')
-        : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', '),
+      details: {
+        student_phone: d.sphone || '', address_line1: d.saddr1 || '', address_line2: d.saddr2 || '', state: d.sstate || '',
+        postal_code: d.spostal || '',
+        parent_address: d.psame ? ((d.parent || d.phone) ? 'Same as student' : '')
+          : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', ')
+      },
       maths_level: level >= 1 && level <= 10 ? level : '',
       notes: extra.length ? `From enquiry of ${niceDate(e.created_at.slice(0, 10))}. ${extra.join('. ')}` : ''
     };
@@ -535,14 +544,18 @@
 
   function detailsTab(s) {
     const row = (k, v) => v || v === 0 ? `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>` : '';
+    const dt = s.details || {};
+    const shown = ['student_phone', 'address_line1', 'address_line2', 'state', 'postal_code', 'parent_address'];
+    const label = k => (DETAIL_DEFS.find(d => d[0] === k) || [k, k.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())])[1];
+    const extraDetails = Object.keys(dt).filter(k => !shown.includes(k)).map(k => row(label(k), dt[k])).join('');
     const sched = DAYS.filter(d => s.schedule[d]).map(d => `${d} ${s.schedule[d].from}–${s.schedule[d].to}`).join(', ');
     $('#tab').innerHTML = `
       <div class="card"><dl class="kv">
-        ${row('Student email (login)', s.email)}${row("Student's phone", s.student_phone)}${row("Parent/guardian's name", s.parent_name)}${row('Parent/guardian email (login)', s.parent_email)}
+        ${row('Student email (login)', s.email)}${row("Student's phone", dt.student_phone)}${row("Parent/guardian's name", s.parent_name)}${row('Parent/guardian email (login)', s.parent_email)}
         ${row('Parent/guardian WhatsApp', s.phone)}${row('Fee per hour', inr(s.fee_per_hour))}${row('Weekly schedule', sched || 'Not set')}
         ${row('Grade', s.grade)}${row('Curriculum / exams', s.exams)}${row('Mode', s.mode)}${row('Hours per week', s.hours_per_week)}
-        ${row('Date of birth', s.dob)}${row('Gender', s.gender)}${row('Address', [s.address_line1, s.address_line2, s.city, s.state, s.postal_code, s.country].filter(Boolean).join(', '))}${row("Parent/guardian's address", s.parent_address)}
-        ${row('Objective', s.objective)}${row('Maths level (1–10)', s.maths_level)}${row('Private notes', s.notes)}${row('Added', s.created_at.slice(0, 10))}
+        ${row('Date of birth', s.dob)}${row('Gender', s.gender)}${row('Address', [dt.address_line1, dt.address_line2, s.city, dt.state, dt.postal_code, s.country].filter(Boolean).join(', '))}${row("Parent/guardian's address", dt.parent_address)}
+        ${row('Objective', s.objective)}${row('Maths level (1–10)', s.maths_level)}${extraDetails}${row('Private notes', s.notes)}${row('Added', s.created_at.slice(0, 10))}
       </dl></div>
       <div class="row">
         <a class="btn" href="#/students/${s.id}/edit">Edit</a>

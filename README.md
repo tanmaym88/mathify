@@ -74,6 +74,7 @@ Under **Cloudflare → your Pages project → Settings → Variables and secrets
 - **Add another admin:** add their email to `ADMIN_EMAILS` in `wrangler.toml`.
 - **Website pages:** edit `tools/build_pages.py` (shared header/footer) and run `npm run build:pages`, or edit the HTML directly.
 - **Home-page puzzle:** optional (visitors can skip it). To make it compulsory again, set `REQUIRED = true` at the top of `public/assets/gate.js`.
+- **New student field (address, phone, anything):** add one line to `DETAIL_DEFS` in `public/app/app.js`. It's stored in the student's flexible `details` (JSON), so no database change is needed. Only sign-in, billing and schedule fields are fixed columns.
 - **After any HTML/CSS/JS change:** run `npm run build:pages` (or `python3 tools/stamp_assets.py public`). It adds version tags (`?v=…`) to CSS/JS links so visitors get the new files immediately; Cloudflare otherwise lets browsers keep old copies for 4 hours.
 
 ## Local development

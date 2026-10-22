@@ -81,6 +81,15 @@ with sync_playwright() as p:
     sid = pg.url.split("/students/")[1].split("/")[0]
     st = pg.request.get(B + "/api/students/" + sid).json()["student"]
     ok("student saved with fee + schedule", st["fee_per_hour"] == 800 and today_day in st["schedule"], st)
+    det = st.get("details") or {}
+    ok("student details saved (phone, address, parent address)", det.get("student_phone") == "90000 22222" and det.get("address_line1") == "C-4, Iris" and det.get("postal_code") == "411028" and det.get("parent_address") == "Same as student", det)
+    r = pg.request.put(B + "/api/students/" + sid, data={"details": {**det, "favourite_topic": "Calculus"}}, headers={"Origin": B})
+    st2 = pg.request.get(B + "/api/students/" + sid).json()["student"]
+    ok("a brand-new field saves without any database change", r.status == 200 and st2["details"].get("favourite_topic") == "Calculus", (r.status, st2.get("details")))
+    pg.goto(B + f"/app/#/students/{sid}/details"); pg.wait_for_selector("text=Favourite topic")
+    ok("new field shows on the Details tab", "Calculus" in pg.inner_text("main"))
+    r = pg.request.put(B + "/api/students/" + sid, data={"details": {"Bad Key!": "x"}}, headers={"Origin": B})
+    ok("invalid detail names rejected", r.status == 400, r.status)
     enq = pg.request.get(B + "/api/enquiries").json()["enquiries"]
     ok("enquiry marked converted and linked", any(e["status"] == "converted" and str(e["student_id"]) == sid for e in enq), enq)
     pg.goto(B + "/app/#/students/new"); pg.wait_for_selector("#enq-pick")
