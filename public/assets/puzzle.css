@@ -43,7 +43,7 @@
 @keyframes cop-fall { to { transform: translateY(110vh) rotate(540deg); } }
   
 /* toolbar: intro line + shuffle button */
-#cop .cop-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 16px; }
+#cop .cop-bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 0 16px; }
 #cop .cop-intro { margin: 0; font-weight: 700; color: #2f3192; font-size: 1.05rem; }
 .puzzle-page .page-title { margin-bottom: 10px; }
 @media (max-width: 600px) {

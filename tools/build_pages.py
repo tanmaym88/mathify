@@ -307,7 +307,6 @@ aptitude = """    <div class="puzzle-page">
       <h1 class="page-title">Aptitude Test</h1>
       <div id="cop">
         <div class="cop-bar">
-          <p class="cop-intro">Try this small aptitude test!</p>
           <button type="button" class="cop-icon" id="cop-shuffle" aria-label="Shuffle" title="Shuffle">↻</button>
           <a class="cop-icon cop-skip" id="cop-skip" href="/" aria-label="Continue" title="Continue">→</a>
           <span id="cop-msg" hidden></span>
