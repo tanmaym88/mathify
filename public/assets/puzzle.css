@@ -59,3 +59,17 @@
   .puzzle-page { padding-top: 12px; }
   #cop #cop-scatter { height: clamp(228px, calc(100svh - 470px), 420px); }
 }
+
+/* 5 cards: bigger cards, the 5 boxes centred in one row */
+#cop { --size: 136px; }
+#cop-scatter { height: clamp(260px, calc(100vh - 500px), 380px); }
+#cop #cop-slots { grid-template-columns: repeat(5, calc(var(--size) + 8px)); justify-content: center; gap: 22px; }
+@media (max-width: 860px) {
+  #cop { --size: 100px; }
+  #cop #cop-slots { grid-template-columns: repeat(5, calc(var(--size) + 8px)); gap: 12px; }
+}
+@media (max-width: 600px) {
+  #cop { --size: 72px; }
+  #cop #cop-scatter { height: clamp(190px, calc(100svh - 390px), 300px); }
+  #cop #cop-slots { grid-template-columns: repeat(3, calc(var(--size) + 8px)); gap: 8px; }
+}

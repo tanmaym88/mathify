@@ -1,19 +1,15 @@
-/* Mathify Counting Order Puzzle (home page).
-   Drag the cards into the boxes in counting order: 1 dog, 2 hands, 3 flowers ... 9 leaves.
-   Solving it unlocks the rest of the site (see assets/gate.js). */
+/* Mathify Counting Order Puzzle (Aptitude Test page).
+   Drag the cards into the boxes in counting order: 1 dog, 2 eyes, 3 flowers, 4 trees, 5 cats.
+   Optional; solving it shows a celebration and links to the home page. */
 (function () {
   // ===== EDIT HERE =====
   // [image path, singular, plural]  — order = 1, 2, 3 ...
   var ITEMS = [
     ['/images/1dog.webp',      'dog',    'dogs'],
-    ['/images/2hands.webp',    'hand',   'hands'],
+    ['/images/2eyes.webp',     'eye',    'eyes'],
     ['/images/3flowers.webp',  'flower', 'flowers'],
     ['/images/4trees.webp',    'tree',   'trees'],
-    ['/images/5cats.webp',     'cat',    'cats'],
-    ['/images/6rocks.webp',    'rock',   'rocks'],
-    ['/images/7pigeons.webp',  'pigeon', 'pigeons'],
-    ['/images/8fishes.webp',   'fish',   'fish'],
-    ['/images/9leaves.webp',   'leaf',   'leaves']
+    ['/images/5cats.webp',     'cat',    'cats']
   ];
   var REPEAT_IMAGE = false;
   var ALLOW_DESCENDING = false;

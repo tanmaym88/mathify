@@ -40,7 +40,9 @@ with sync_playwright() as p:
     page.wait_for_load_state("load")
     n = page.locator(".cop-card").count()
     loaded = page.evaluate("[...document.querySelectorAll('.cop-card img')].every(i=>i.complete&&i.naturalWidth>0)")
-    ok("puzzle has 9 cards", n == 9, n)
+    ok("puzzle has 5 cards", n == 5, n)
+    ok("puzzle has 5 boxes", page.locator(".cop-slot").count() == 5)
+    ok("2 = eyes (not hands)", page.locator('.cop-card[data-count="2"] img[src*="2eyes"]').count() == 1)
     ok("puzzle images all load", loaded)
     page.screenshot(path=f"{OUT}/puzzle_desktop.png")
 
@@ -55,7 +57,7 @@ with sync_playwright() as p:
         page.mouse.up()
         page.wait_for_timeout(260)
 
-    for c in range(1, 10):
+    for c in range(1, 6):
         page.locator(".cop-slot").nth(c-1).scroll_into_view_if_needed()
         drag_card_to_slot(c, c-1)
     page.wait_for_timeout(400)
@@ -184,12 +186,12 @@ with sync_playwright() as p:
         pp = pc.new_page(); pp.goto(B + "/aptitude-test/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
         pp.evaluate("window.scrollTo(0, document.getElementById('cop').getBoundingClientRect().top + scrollY - 4)"); pp.wait_for_timeout(150)
         fits = pp.evaluate("[...document.querySelectorAll('.cop-slot')].every(s => s.getBoundingClientRect().bottom <= window.innerHeight) && document.querySelector('.cop-card').getBoundingClientRect().top >= 0")
-        ok(f"{vw}x{vh}: cards + all 9 placeholders fit on one screen", fits)
+        ok(f"{vw}x{vh}: cards + all 5 boxes fit on one screen", fits)
         overl = pp.evaluate("""() => { const cs=[...document.querySelectorAll('.cop-card')].map(c=>c.getBoundingClientRect()); let n=0;
           for(let i=0;i<cs.length;i++)for(let j=i+1;j<cs.length;j++){const a=cs[i],b=cs[j]; if(a.left<b.right-1&&b.left<a.right-1&&a.top<b.bottom-1&&b.top<a.bottom-1) n++;} return n; }""")
         ok(f"{vw}x{vh}: no cards overlap", overl == 0, overl)
         ok(f"{vw}x{vh}: swiping the puzzle area can scroll the page", pp.evaluate("getComputedStyle(document.getElementById('cop-stage')).touchAction") != "none")
-        for c in range(1, 10):
+        for c in range(1, 6):
             cb = pp.locator(f'.cop-card[data-count="{c}"]').bounding_box(); sb = pp.locator(".cop-slot").nth(c-1).bounding_box()
             pp.mouse.move(cb["x"] + cb["width"]/2, cb["y"] + cb["height"]/2); pp.mouse.down()
             pp.mouse.move(sb["x"] + sb["width"]/2, sb["y"] + sb["height"]/2, steps=8); pp.mouse.up(); pp.wait_for_timeout(260)
