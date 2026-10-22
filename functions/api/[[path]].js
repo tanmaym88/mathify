@@ -150,8 +150,19 @@ async function getStudent(env, sid) {
   return parseStudent(r);
 }
 
+// Only write columns the database actually has, so new code can deploy before a migration
+// runs on the live database (the extra fields simply aren't saved until it does).
+let studentCols = null;
+async function knownStudentKeys(env, s) {
+  if (!studentCols) {
+    const { results } = await env.DB.prepare('PRAGMA table_info(students)').all();
+    studentCols = new Set(results.map(r => r.name));
+  }
+  return Object.keys(s).filter(k => studentCols.has(k));
+}
+
 async function insertStudent(env, s) {
-  const keys = Object.keys(s);
+  const keys = await knownStudentKeys(env, s);
   try {
     const r = await env.DB.prepare(
       `INSERT INTO students (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')}) RETURNING id`
@@ -313,7 +324,7 @@ route('PUT', '/api/students/:id', async ({ user, env, params, request }) => {
   requireAdmin(user);
   const sid = Number(params.id); await getStudent(env, sid);
   const s = pickStudent(await body(request), { partial: true });
-  const keys = Object.keys(s);
+  const keys = await knownStudentKeys(env, s);
   if (!keys.length) bad('Nothing to update');
   try {
     await env.DB.prepare(`UPDATE students SET ${keys.map(k => k + ' = ?').join(', ')} WHERE id = ?`).bind(...keys.map(k => s[k]), sid).run();
