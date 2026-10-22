@@ -50,6 +50,53 @@
   same.addEventListener('change', updateAddr);
   updateAddr(); updateParentRules();
 
+  // Country + state/province/region dropdowns (the state list depends on the country).
+  // Data: assets/regions.json (ISO 3166 countries and subdivisions). If it can't load, the plain
+  // text boxes stay and the form still works.
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function setupRegions(data) {
+    var names = {};
+    data.c.forEach(function (r) { names[r[0]] = r[1]; });
+    function opt(code, name) { return '<option data-code="' + code + '">' + esc(name) + '</option>'; }
+    function countrySelect(input) {
+      var sel = document.createElement('select');
+      sel.id = input.id; sel.name = input.name;
+      sel.innerHTML = '<option value="">Select country…</option>' +
+        '<optgroup label="Common">' + data.top.map(function (c) { return opt(c, names[c]); }).join('') + '</optgroup>' +
+        '<optgroup label="All countries">' + data.c.map(function (r) { return opt(r[0], r[1]); }).join('') + '</optgroup>';
+      input.parentNode.replaceChild(sel, input);
+      return sel;
+    }
+    function stateFor(countrySel, text) {
+      var name = text.name, id = text.id;
+      var sel = document.createElement('select');
+      text.parentNode.insertBefore(sel, text.nextSibling);
+      function use(el, other) { el.hidden = false; el.name = name; el.id = id; other.hidden = true; other.name = ''; other.id = id + '-alt'; }
+      function update() {
+        var o = countrySel.options[countrySel.selectedIndex], code = o && o.getAttribute('data-code');
+        var list = code ? data.s[code] : null;
+        if (!code) {
+          sel.innerHTML = '<option value="">Select a country first</option>'; sel.disabled = true; use(sel, text);
+        } else if (list && list.length) {
+          sel.innerHTML = '<option value="">Select…</option>' + list.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('');
+          sel.disabled = false; use(sel, text);
+        } else {                       // no states/regions listed for this country: free text, optional
+          text.value = ''; text.placeholder = 'If applicable'; use(text, sel);
+        }
+        updateParentRules();
+      }
+      countrySel.addEventListener('change', update);
+      update();
+    }
+    stateFor(countrySelect(form.elements.country), form.elements.sstate);
+    stateFor(countrySelect(form.elements.pcountry), form.elements.pstate);
+  }
+  if (window.fetch) {
+    fetch('/assets/regions.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d) setupRegions(d); form.setAttribute('data-regions', d ? 'ready' : 'text'); })
+      .catch(function () { form.setAttribute('data-regions', 'text'); });
+  }
+
   function joinAddr(p, city, country) {
     return [val(p + 'addr1'), val(p + 'addr2'), val(city), val(p + 'state'), val(p + 'postal'), val(country)]
       .filter(Boolean).join(', ');
