@@ -199,10 +199,12 @@ with sync_playwright() as p:
     # 7b. very short screen: holding a card near the bottom edge scrolls the page
     pc = br.new_context(viewport={"width": 360, "height": 480}, is_mobile=True, has_touch=True)
     pp = pc.new_page(); pp.goto(B + "/aptitude-test/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
+    pp.evaluate("window.scrollTo(0, document.getElementById('cop-scatter').getBoundingClientRect().top + scrollY - 4)"); pp.wait_for_timeout(150)
+    y0 = pp.evaluate("scrollY")
     cb = pp.locator('.cop-card[data-count="1"]').bounding_box()
     pp.mouse.move(cb["x"] + cb["width"]/2, min(cb["y"] + cb["height"]/2, 300)); pp.mouse.down()
     pp.mouse.move(cb["x"] + cb["width"]/2, 470, steps=6); pp.wait_for_timeout(700)
-    scrolled = pp.evaluate("window.scrollY"); pp.mouse.up()
+    scrolled = pp.evaluate("window.scrollY") - y0; pp.mouse.up()
     ok("short screen: dragging to bottom edge auto-scrolls", scrolled > 30, scrolled)
     pp.screenshot(path=f"{OUT}/puzzle_short.png"); pc.close()
     mp.evaluate("localStorage.setItem('mathifyUnlocked','1')")
