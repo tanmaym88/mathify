@@ -1,4 +1,4 @@
-import subprocess, time, sys, os, urllib.parse
+import os, subprocess, time, sys, urllib.parse
 from playwright.sync_api import sync_playwright
 
 SITE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public")
@@ -12,7 +12,7 @@ results = []
 def ok(name, cond, extra=""):
     results.append((name, bool(cond), extra))
 
-PAGES = ["/welcome/", "/why-maths/", "/about-mathify/", "/about-the-teacher/",
+PAGES = ["/", "/aptitude-test/", "/why-maths/", "/about-mathify/", "/about-the-teacher/",
          "/fees-and-schedule/", "/testimonials/", "/contact/", "/feedback/"]
 
 with sync_playwright() as p:
@@ -24,16 +24,19 @@ with sync_playwright() as p:
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
 
-    # 1. puzzle is optional: pages open directly, and the home page offers a skip link
-    page.goto(B + "/welcome/")
-    page.wait_for_load_state("load")
-    ok("/welcome opens without solving the puzzle", urllib.parse.urlparse(page.url).path == "/welcome/", page.url)
+    # 1. home page is the welcome page; aptitude test is a normal page reached from the navbar
     page.goto(B + "/"); page.wait_for_load_state("load")
-    page.click("text=Skip the test and go to the website"); page.wait_for_load_state("load")
-    ok("skip link goes to the website", urllib.parse.urlparse(page.url).path.startswith("/welcome"), page.url)
+    ok("home page is the welcome page (not the puzzle)", page.locator(".hero h1").count() == 1 and page.locator(".cop-card").count() == 0)
+    ok("navbar has an Aptitude Test link", page.locator(".nav-menu a[href='/aptitude-test']").count() == 1)
+    page.click(".nav-menu a[href='/aptitude-test']"); page.wait_for_load_state("load")
+    ok("navbar link opens the aptitude test page", urllib.parse.urlparse(page.url).path.rstrip("/") == "/aptitude-test", page.url)
+    ok("aptitude test page has the site header and footer", page.locator(".site-header").count() == 1 and page.locator(".site-footer").count() == 1)
+    # (this local server ignores Cloudflare's _redirects, so check the rule itself; live redirect verified after deploy)
+    rules = [l.split() for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "_redirects")) if l.strip() and not l.startswith("#")]
+    ok("old /welcome address redirects to home (rule)", ["/welcome", "/", "301"] in rules and ["/welcome/", "/", "301"] in rules, rules)
 
     # 2. puzzle renders with 9 loaded images
-    page.goto(B + "/")
+    page.goto(B + "/aptitude-test/")
     page.wait_for_load_state("load")
     n = page.locator(".cop-card").count()
     loaded = page.evaluate("[...document.querySelectorAll('.cop-card img')].every(i=>i.complete&&i.naturalWidth>0)")
@@ -73,7 +76,7 @@ with sync_playwright() as p:
         page.screenshot(path=f"{OUT}/desk{path.strip('/').replace('/','_')}.png", full_page=True)
 
     # 5. all internal links resolve
-    page.goto(B + "/welcome/")
+    page.goto(B + "/")
     hrefs = set()
     for path in PAGES:
         page.goto(B + path)
@@ -164,23 +167,27 @@ with sync_playwright() as p:
     m.route("**/fonts.googleapis.com/**", lambda r: r.abort())
     m.route("**/fonts.gstatic.com/**", lambda r: r.abort())
     mp = m.new_page()
-    mp.goto(B + "/")
+    mp.goto(B + "/aptitude-test/")
     mp.wait_for_load_state("load")
     mp.screenshot(path=f"{OUT}/puzzle_mobile.png")
     no_hscroll = mp.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
     ok("mobile puzzle no horizontal scroll", no_hscroll)
-    # login reachable without solving the puzzle
+    # login reachable straight from the home page
     lc = br.new_context(); lp = lc.new_page(); lp.goto(B + "/"); lp.wait_for_load_state("load")
-    ok("puzzle page has a Login button", lp.locator("a.cop-login[href='/app/']").is_visible())
-    lp.click("a.cop-login"); lp.wait_for_selector(".login, .topbar", state="attached", timeout=8000)
-    ok("Login opens the app sign-in without solving the puzzle", "/app/" in lp.url, lp.url)
+    ok("home page has a Login button", lp.locator("a.nav-login[href='/app/']").is_visible())
+    lp.click("a.nav-login"); lp.wait_for_selector(".login, .topbar", state="attached", timeout=8000)
+    ok("Login opens the app sign-in", "/app/" in lp.url, lp.url)
     lc.close()
     # 7a. phones: whole puzzle fits on screen, empty areas scroll, puzzle solvable
     for vw, vh in [(375, 667), (390, 664), (360, 640)]:
         pc = br.new_context(viewport={"width": vw, "height": vh}, is_mobile=True, has_touch=True)
-        pp = pc.new_page(); pp.goto(B + "/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
-        fits = pp.evaluate("[...document.querySelectorAll('.cop-slot')].every(s => s.getBoundingClientRect().bottom <= window.innerHeight)")
-        ok(f"{vw}x{vh}: all 9 placeholders visible without scrolling", fits)
+        pp = pc.new_page(); pp.goto(B + "/aptitude-test/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
+        pp.evaluate("window.scrollTo(0, document.getElementById('cop').getBoundingClientRect().top + scrollY - 4)"); pp.wait_for_timeout(150)
+        fits = pp.evaluate("[...document.querySelectorAll('.cop-slot')].every(s => s.getBoundingClientRect().bottom <= window.innerHeight) && document.querySelector('.cop-card').getBoundingClientRect().top >= 0")
+        ok(f"{vw}x{vh}: cards + all 9 placeholders fit on one screen", fits)
+        overl = pp.evaluate("""() => { const cs=[...document.querySelectorAll('.cop-card')].map(c=>c.getBoundingClientRect()); let n=0;
+          for(let i=0;i<cs.length;i++)for(let j=i+1;j<cs.length;j++){const a=cs[i],b=cs[j]; if(a.left<b.right-1&&b.left<a.right-1&&a.top<b.bottom-1&&b.top<a.bottom-1) n++;} return n; }""")
+        ok(f"{vw}x{vh}: no cards overlap", overl == 0, overl)
         ok(f"{vw}x{vh}: swiping the puzzle area can scroll the page", pp.evaluate("getComputedStyle(document.getElementById('cop-stage')).touchAction") != "none")
         for c in range(1, 10):
             cb = pp.locator(f'.cop-card[data-count="{c}"]').bounding_box(); sb = pp.locator(".cop-slot").nth(c-1).bounding_box()
@@ -191,7 +198,7 @@ with sync_playwright() as p:
         pc.close()
     # 7b. very short screen: holding a card near the bottom edge scrolls the page
     pc = br.new_context(viewport={"width": 360, "height": 480}, is_mobile=True, has_touch=True)
-    pp = pc.new_page(); pp.goto(B + "/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
+    pp = pc.new_page(); pp.goto(B + "/aptitude-test/"); pp.wait_for_load_state("load"); pp.wait_for_timeout(300)
     cb = pp.locator('.cop-card[data-count="1"]').bounding_box()
     pp.mouse.move(cb["x"] + cb["width"]/2, min(cb["y"] + cb["height"]/2, 300)); pp.mouse.down()
     pp.mouse.move(cb["x"] + cb["width"]/2, 470, steps=6); pp.wait_for_timeout(700)
@@ -199,7 +206,7 @@ with sync_playwright() as p:
     ok("short screen: dragging to bottom edge auto-scrolls", scrolled > 30, scrolled)
     pp.screenshot(path=f"{OUT}/puzzle_short.png"); pc.close()
     mp.evaluate("localStorage.setItem('mathifyUnlocked','1')")
-    mp.goto(B + "/welcome/")
+    mp.goto(B + "/")
     mp.wait_for_load_state("load")
     ok("mobile menu hidden initially", not mp.is_visible(".nav-menu"))
     mp.click(".nav-toggle")
@@ -212,7 +219,7 @@ with sync_playwright() as p:
         mp.screenshot(path=f"{OUT}/mob{path.strip('/').replace('/','_')}.png", full_page=True)
 
     # 8. desktop dropdown
-    page.goto(B + "/welcome/")
+    page.goto(B + "/")
     page.click(".dd-btn")
     ok("desktop About dropdown opens", page.is_visible(".dd-list a[href='/about-the-teacher']"))
     br.close()

@@ -134,12 +134,12 @@
       : err ? '<p class="form-error">Sign-in didn\'t complete. Please try again.</p>' : '';
     view.innerHTML = `
       <div class="card login">
-        <a href="/welcome"><img class="login-logo" src="/brand/mathify-logo-stacked.svg" alt="Mathify" width="200" height="148"></a>
+        <a href="/"><img class="login-logo" src="/brand/mathify-logo-stacked.svg" alt="Mathify" width="200" height="148"></a>
         <p class="sub">Classes, attendance, fees and invoices</p>
         ${msg}
         <a class="btn" href="/api/auth/login">Sign in with Google</a>
         <p class="note">Students and parents: use the Google account registered with Mathify.<br>
-        <a href="/welcome">← Back to the website</a></p>
+        <a href="/">← Back to the website</a></p>
       </div>`;
   }
 

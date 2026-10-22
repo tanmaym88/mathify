@@ -9,6 +9,7 @@ NAV = [
     ("DROPDOWN", "About", [("/about-mathify", "Mathify"), ("/about-the-teacher", "The Teacher")]),
     ("/fees-and-schedule", "Fees and Schedule"),
     ("/testimonials", "Testimonials"),
+    ("/aptitude-test", "Aptitude Test"),
     ("/contact", "Contact"),
     ("LOGIN", "Login"),
 ]
@@ -35,7 +36,7 @@ def nav_html(current):
     return "".join(items)
 
 
-def page(path, title, description, body, current=None, extra_scripts=""):
+def page(path, title, description, body, current=None, extra_scripts="", extra_head=""):
     full_title = "Mathify" if title == "Mathify" else f"{title} | Mathify"
     doc = f"""<!doctype html>
 <html lang="en">
@@ -59,12 +60,12 @@ def page(path, title, description, body, current=None, extra_scripts=""):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/site.css">{extra_head}
 </head>
 <body>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="Main">
-      <a class="brand" href="/welcome"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="146" height="40"></a>
+      <a class="brand" href="/"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="146" height="40"></a>
       <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
       <ul class="nav-menu">{nav_html(current)}</ul>
     </nav>
@@ -101,9 +102,10 @@ welcome = """    <section class="hero">
       <a class="tile" href="/about-the-teacher"><strong>The Teacher</strong><span>Tanmay Mogra — IIT alumnus, JEE AIR 328, 9+ years of teaching.</span></a>
       <a class="tile" href="/fees-and-schedule"><strong>Fees and Schedule</strong><span>Hourly billing, weekly schedule and the rescheduling policy.</span></a>
       <a class="tile" href="/testimonials"><strong>Testimonials</strong><span>What parents and students across India, UK and UAE say.</span></a>
+      <a class="tile" href="/aptitude-test"><strong>Aptitude Test</strong><span>A quick picture puzzle. Can you crack the order?</span></a>
       <a class="tile" href="/contact"><strong>Contact</strong><span>Send an enquiry on WhatsApp or by email.</span></a>
     </div>"""
-page("/welcome", "Welcome", "Welcome to Mathify — Maths coaching by Tanmay Mogra.", welcome, current="/welcome")
+page("/", "Mathify", "Mathify — one-to-one Maths coaching by Tanmay Mogra (IIT alumnus, JEE AIR 328). Online worldwide and offline in Magarpatta, Pune.", welcome, current="/")
 
 # ---------------- Why Maths ----------------
 why = """    <div class="page">
@@ -299,6 +301,34 @@ testi = f"""    <div class="page">
       </div>
     </div>"""
 page("/testimonials", "Testimonials", "What parents and students in India, the UK and the UAE say about learning Maths with Tanmay.", testi, current="/testimonials")
+
+# ---------------- Aptitude Test (counting-order puzzle; optional) ----------------
+aptitude = """    <div class="puzzle-page">
+      <h1 class="page-title">Aptitude Test</h1>
+      <div id="cop">
+        <div class="cop-bar">
+          <p class="cop-intro">Try this small aptitude test!</p>
+          <button type="button" class="cop-icon" id="cop-shuffle" aria-label="Shuffle" title="Shuffle">↻</button>
+          <a class="cop-icon cop-skip" id="cop-skip" href="/" aria-label="Continue" title="Continue">→</a>
+          <span id="cop-msg" hidden></span>
+        </div>
+        <div id="cop-stage">
+          <div id="cop-scatter"></div>
+          <div id="cop-slots"></div>
+        </div>
+      </div>
+      <div id="cop-overlay" role="dialog" aria-modal="true" aria-label="Puzzle solved">
+        <div class="cop-modal">
+          <h2>🎉🎉🎉🎉🎉</h2>
+          <p id="cop-successText" hidden></p>
+          <a class="cop-icon" id="cop-enter" href="/" aria-label="Go to the home page" title="Home">→</a>
+          <button type="button" class="cop-icon cop-ghost" id="cop-again" aria-label="Play again" title="Play again">↻</button>
+        </div>
+      </div>
+    </div>"""
+page("/aptitude-test", "Aptitude Test", "A quick picture puzzle from Mathify — put the cards in the right order.", aptitude, current="/aptitude-test",
+     extra_scripts='\n  <script src="/assets/puzzle.js"></script>',
+     extra_head='\n  <link rel="stylesheet" href="/assets/puzzle.css">\n  <link rel="preload" href="/images/5cats.webp" as="image">')
 
 # ---------------- Feedback ----------------
 feedback = """    <div class="page">

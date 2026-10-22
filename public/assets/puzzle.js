@@ -17,7 +17,7 @@
   ];
   var REPEAT_IMAGE = false;
   var ALLOW_DESCENDING = false;
-  var NEXT_URL = '/welcome';          // page to open after solving
+  var NEXT_URL = '/';          // page to open after solving
   var UNLOCK_KEY = 'mathifyUnlocked'; // must match assets/gate.js
   // =====================
 

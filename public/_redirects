@@ -1,4 +1,6 @@
 # Cloudflare Pages redirects (old Webflow URLs keep working)
 /about    /about-mathify  301
 /home     /               301
+/welcome  /               301
+/welcome/ /               301
 /login    /app/  302
