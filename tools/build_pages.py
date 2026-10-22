@@ -369,46 +369,94 @@ contact = f"""    <div class="page">
                 </select>
               </div>
               <div>
-                <label for="f-dob">Date of birth</label>
-                <input id="f-dob" name="dob" type="date">
+                <label for="f-dob">Date of birth <span class="req">*</span></label>
+                <input id="f-dob" name="dob" type="date" required>
               </div>
               <div>
                 <label for="f-grade">Grade / Year</label>
                 <input id="f-grade" name="grade" type="text" placeholder="e.g. 10th, Year 12">
               </div>
+              <div>
+                <label for="f-semail">Student's Gmail address <span class="req">*</span></label>
+                <input id="f-semail" name="semail" type="email" autocomplete="off" placeholder="name@gmail.com" required>
+                <span class="field-hint">Used to sign in to the Mathify app — must be a Gmail address.</span>
+              </div>
+              <div>
+                <label for="f-sphone">Student's contact number <span class="req" id="sphone-req" hidden>*</span></label>
+                <input id="f-sphone" name="sphone" type="tel" autocomplete="off" inputmode="tel" placeholder="+91 …">
+              </div>
+              <div class="full"><span class="subhead">Student's address</span></div>
               <div class="full">
-                <label for="f-exams">Curriculum / target exams</label>
-                <input id="f-exams" name="exams" type="text" placeholder="e.g. IGCSE, CBSE, JEE, Olympiads">
+                <label for="f-saddr1">Address line 1</label>
+                <input id="f-saddr1" name="saddr1" type="text" autocomplete="section-student address-line1" placeholder="House / flat no., building, street">
               </div>
               <div class="full">
-                <label for="f-semail">Student's email</label>
-                <input id="f-semail" name="semail" type="email" autocomplete="off">
+                <label for="f-saddr2">Address line 2 <span class="opt">(optional)</span></label>
+                <input id="f-saddr2" name="saddr2" type="text" autocomplete="section-student address-line2" placeholder="Area, locality, landmark">
+              </div>
+              <div>
+                <label for="f-city">City / town</label>
+                <input id="f-city" name="city" type="text" autocomplete="section-student address-level2">
+              </div>
+              <div>
+                <label for="f-sstate">State / province / region</label>
+                <input id="f-sstate" name="sstate" type="text" autocomplete="section-student address-level1">
+              </div>
+              <div>
+                <label for="f-spostal">Postal / ZIP code</label>
+                <input id="f-spostal" name="spostal" type="text" autocomplete="section-student postal-code">
+              </div>
+              <div>
+                <label for="f-country">Country</label>
+                <input id="f-country" name="country" type="text" autocomplete="section-student country-name" placeholder="India">
               </div>
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>Parent</legend>
+          <fieldset id="parent-set">
+            <legend>Parent/Guardian</legend>
+            <p class="adult-note" id="adult-note" hidden>The student is 18 or older, so parent/guardian details are optional.</p>
             <div class="form-grid">
               <div>
-                <label for="f-parent">Parent's name <span class="req">*</span></label>
-                <input id="f-parent" name="parent" type="text" autocomplete="name" required>
+                <label for="f-parent">Parent/guardian's name <span class="req preq">*</span></label>
+                <input id="f-parent" name="parent" type="text" autocomplete="name">
               </div>
               <div>
-                <label for="f-phone">Contact number (WhatsApp) <span class="req">*</span></label>
-                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 …" required>
+                <label for="f-phone">Parent/guardian's contact number (WhatsApp) <span class="req preq">*</span></label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 …">
               </div>
               <div class="full">
-                <label for="f-pemail">Parent's email</label>
-                <input id="f-pemail" name="pemail" type="email" autocomplete="email">
+                <label for="f-pemail">Parent/guardian's Gmail address <span class="req preq">*</span></label>
+                <input id="f-pemail" name="pemail" type="email" autocomplete="email" placeholder="name@gmail.com">
+              </div>
+              <div class="full"><span class="subhead">Parent/guardian's address</span>
+                <label class="check"><input type="checkbox" id="f-psame" name="psame" value="Yes" checked> Same as the student's address</label>
+              </div>
+            </div>
+            <div class="form-grid" id="paddr" hidden>
+              <div class="full">
+                <label for="f-paddr1">Address line 1</label>
+                <input id="f-paddr1" name="paddr1" type="text" autocomplete="section-parent address-line1" placeholder="House / flat no., building, street">
+              </div>
+              <div class="full">
+                <label for="f-paddr2">Address line 2 <span class="opt">(optional)</span></label>
+                <input id="f-paddr2" name="paddr2" type="text" autocomplete="section-parent address-line2" placeholder="Area, locality, landmark">
               </div>
               <div>
-                <label for="f-city">City / town</label>
-                <input id="f-city" name="city" type="text" autocomplete="address-level2">
+                <label for="f-pcity">City / town</label>
+                <input id="f-pcity" name="pcity" type="text" autocomplete="section-parent address-level2">
               </div>
               <div>
-                <label for="f-country">Country</label>
-                <input id="f-country" name="country" type="text" autocomplete="country-name" placeholder="India">
+                <label for="f-pstate">State / province / region</label>
+                <input id="f-pstate" name="pstate" type="text" autocomplete="section-parent address-level1">
+              </div>
+              <div>
+                <label for="f-ppostal">Postal / ZIP code</label>
+                <input id="f-ppostal" name="ppostal" type="text" autocomplete="section-parent postal-code">
+              </div>
+              <div>
+                <label for="f-pcountry">Country</label>
+                <input id="f-pcountry" name="pcountry" type="text" autocomplete="section-parent country-name" placeholder="India">
               </div>
             </div>
           </fieldset>
@@ -417,12 +465,15 @@ contact = f"""    <div class="page">
             <legend>Classes</legend>
             <div class="form-grid">
               <div class="full">
+                <label for="f-exams">Curriculum / target exams</label>
+                <input id="f-exams" name="exams" type="text" placeholder="e.g. IGCSE, CBSE, JEE, Olympiads">
+              </div>
+              <div class="full">
                 <span class="label">Objective of enrolling</span>
                 <div class="choices">
                   <label><input type="radio" name="objective" value="Prepare for exams"> Prepare for exams</label>
                   <label><input type="radio" name="objective" value="Learn Maths for fun / curiosity"> Learn Maths for fun / curiosity</label>
                   <label><input type="radio" name="objective" value="Both"> Both</label>
-                  <label><input type="radio" name="objective" value="Other"> Other</label>
                 </div>
               </div>
               <div>
@@ -464,8 +515,8 @@ contact = f"""    <div class="page">
                 <label for="f-source">How did you come to know about Mathify?</label>
                 <select id="f-source" name="source">
                   <option value="">Select…</option>
-                  <option>Word of mouth</option><option>WhatsApp</option><option>Facebook</option>
-                  <option>Pamphlet</option><option>Google search</option><option>Other</option>
+                  <option>Word of Mouth (Online/Offline)</option><option>Internet Search</option>
+                  <option>Advertisement</option><option>Others</option>
                 </select>
               </div>
               <div class="full">

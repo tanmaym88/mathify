@@ -267,11 +267,15 @@
   const FIELD_DEFS = [
     ['name', "Student's name *", 'text'], ['email', "Student's Google email * (to sign in)", 'email'],
     ['parent_name', "Parent's name", 'text'], ['parent_email', "Parent's Google email (can also sign in)", 'email'],
-    ['phone', 'WhatsApp number', 'tel'], ['fee_per_hour', 'Fee per hour (₹) *', 'number'],
+    ['phone', 'Parent/guardian WhatsApp', 'tel'], ['student_phone', "Student's contact number", 'tel'],
+    ['fee_per_hour', 'Fee per hour (₹) *', 'number'],
     ['grade', 'Grade / Year', 'text'], ['exams', 'Curriculum / target exams', 'text'],
     ['mode', 'Mode', 'select:Online,Offline'], ['hours_per_week', 'Hours per week', 'number'],
     ['dob', 'Date of birth', 'date'], ['gender', 'Gender', 'select:Male,Female,Others'],
-    ['city', 'City', 'text'], ['country', 'Country', 'text'],
+    ['address_line1', 'Address line 1', 'text'], ['address_line2', 'Address line 2', 'text'],
+    ['city', 'City', 'text'], ['state', 'State / province / region', 'text'],
+    ['postal_code', 'Postal / ZIP code', 'text'], ['country', 'Country', 'text'],
+    ['parent_address', "Parent/guardian's address", 'text'],
     ['objective', 'Objective', 'text'], ['maths_level', 'Maths level (1–10)', 'number']
   ];
 
@@ -333,6 +337,10 @@
       mode: /offline/i.test(d.mode || '') ? 'Offline' : /online/i.test(d.mode || '') ? 'Online' : '',
       hours_per_week: hours > 0 && hours <= 40 ? hours : '', dob: /^\d{4}-\d{2}-\d{2}$/.test(d.dob || '') ? d.dob : '',
       gender, city: d.city || '', country: d.country || '', objective: d.objective || '',
+      student_phone: d.sphone || '', address_line1: d.saddr1 || '', address_line2: d.saddr2 || '', state: d.sstate || '',
+      postal_code: d.spostal || '',
+      parent_address: d.psame ? ((d.parent || d.phone) ? 'Same as student' : '')
+        : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', '),
       maths_level: level >= 1 && level <= 10 ? level : '',
       notes: extra.length ? `From enquiry of ${niceDate(e.created_at.slice(0, 10))}. ${extra.join('. ')}` : ''
     };
@@ -530,10 +538,10 @@
     const sched = DAYS.filter(d => s.schedule[d]).map(d => `${d} ${s.schedule[d].from}–${s.schedule[d].to}`).join(', ');
     $('#tab').innerHTML = `
       <div class="card"><dl class="kv">
-        ${row('Student email (login)', s.email)}${row("Parent's name", s.parent_name)}${row('Parent email (login)', s.parent_email)}
-        ${row('WhatsApp', s.phone)}${row('Fee per hour', inr(s.fee_per_hour))}${row('Weekly schedule', sched || 'Not set')}
+        ${row('Student email (login)', s.email)}${row("Student's phone", s.student_phone)}${row("Parent/guardian's name", s.parent_name)}${row('Parent/guardian email (login)', s.parent_email)}
+        ${row('Parent/guardian WhatsApp', s.phone)}${row('Fee per hour', inr(s.fee_per_hour))}${row('Weekly schedule', sched || 'Not set')}
         ${row('Grade', s.grade)}${row('Curriculum / exams', s.exams)}${row('Mode', s.mode)}${row('Hours per week', s.hours_per_week)}
-        ${row('Date of birth', s.dob)}${row('Gender', s.gender)}${row('City', s.city)}${row('Country', s.country)}
+        ${row('Date of birth', s.dob)}${row('Gender', s.gender)}${row('Address', [s.address_line1, s.address_line2, s.city, s.state, s.postal_code, s.country].filter(Boolean).join(', '))}${row("Parent/guardian's address", s.parent_address)}
         ${row('Objective', s.objective)}${row('Maths level (1–10)', s.maths_level)}${row('Private notes', s.notes)}${row('Added', s.created_at.slice(0, 10))}
       </dl></div>
       <div class="row">
@@ -644,8 +652,10 @@
     all.forEach(e => counts[e.status]++);
     state.newEnquiries = counts.new; setTabs();
     const list = filter === 'all' ? all : all.filter(e => e.status === filter);
-    const L = { student: 'Student', grade: 'Grade', exams: 'Curriculum / exams', parent: 'Parent', phone: 'WhatsApp', pemail: 'Parent email',
-      semail: 'Student email', city: 'City', country: 'Country', mode: 'Mode', hours: 'Hours/week', days: 'Days', time: 'Time',
+    const L = { student: 'Student', grade: 'Grade', exams: 'Curriculum / exams', parent: 'Parent/guardian', phone: 'Parent/guardian WhatsApp', pemail: 'Parent/guardian email',
+      semail: 'Student email', sphone: "Student's phone", saddr1: 'Address line 1', saddr2: 'Address line 2', city: 'City', sstate: 'State / province',
+      spostal: 'Postal code', country: 'Country', psame: 'Parent address same as student', paddr1: 'Parent address line 1', paddr2: 'Parent address line 2',
+      pcity: 'Parent city', pstate: 'Parent state', ppostal: 'Parent postal code', pcountry: 'Parent country', mode: 'Mode', hours: 'Hours/week', days: 'Days', time: 'Time',
       objective: 'Objective', level: 'Maths level', demo: 'Demo class', source: 'Heard via', dob: 'DOB', gender: 'Gender', message: 'Message', via: 'Came via' };
     view.innerHTML = `
       <h1>Enquiries</h1><p class="sub">From the website enquiry form, plus older Google Form responses.</p>

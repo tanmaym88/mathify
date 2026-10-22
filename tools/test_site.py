@@ -91,35 +91,57 @@ with sync_playwright() as p:
 
     # 6. enquiry form
     page.goto(B + "/contact/")
-    page.evaluate("window.__opened=[]; window.open=(u)=>{window.__opened.push(u)}")
+    page.evaluate("window.__opened=[]; window.open=(u)=>{window.__opened.push(u)}; 0")
+    def err(): return page.inner_text("#form-error").lower()
+    ok("Parent heading renamed to Parent/Guardian", page.locator("legend", has_text="Parent/Guardian").count() == 1)
+    ok("curriculum field is under Classes", page.locator("fieldset:has(legend:text('Classes')) #f-exams").count() == 1)
+    ok("objective has no 'Other' option", page.locator("input[name=objective][value=Other]").count() == 0 and page.locator("input[name=objective]").count() == 3)
+    ok("'heard about' options updated", page.eval_on_selector_all("#f-source option", "os=>os.map(o=>o.text).slice(1)") == ["Word of Mouth (Online/Offline)", "Internet Search", "Advertisement", "Others"])
+    ok("address fields present (student)", all(page.locator(f"#f-{n}").count() == 1 for n in ["saddr1", "saddr2", "city", "sstate", "spostal", "country"]))
+    ok("parent address hidden while 'same as student' ticked", not page.is_visible("#f-paddr1"))
+    page.uncheck("#f-psame")
+    ok("parent address appears when unticked", page.is_visible("#f-paddr1") and page.is_visible("#f-pcountry"))
+    page.check("#f-psame")
     page.click("#send-wa")
-    ok("empty form asks for student name", "student" in page.inner_text("#form-error").lower(), page.inner_text("#form-error"))
+    ok("empty form asks for student name", "student" in err(), err())
     page.fill("#f-student", "Riya Kulkarni")
     page.click("#send-wa")
-    ok("then asks for parent name", "parent" in page.inner_text("#form-error").lower(), page.inner_text("#form-error"))
-    page.fill("#f-parent", "Meera Kulkarni")
-    page.click("#send-wa")
-    ok("then asks for WhatsApp number", "whatsapp" in page.inner_text("#form-error").lower(), page.inner_text("#form-error"))
-    page.fill("#f-phone", "+91 98200 00000")
-    page.select_option("#f-gender", "Female")
+    ok("date of birth is required", "date of birth" in err(), err())
     page.fill("#f-dob", "2011-05-04")
-    page.fill("#f-grade", "10th")
+    page.click("#send-wa")
+    ok("student Gmail is required", "gmail" in err(), err())
+    page.fill("#f-semail", "riya@yahoo.com"); page.click("#send-wa")
+    ok("non-Gmail student email rejected", "gmail" in err(), err())
+    page.fill("#f-semail", "riya.k@gmail.com"); page.click("#send-wa")
+    ok("under 18: parent/guardian name required", "parent/guardian" in err() and "name" in err(), err())
+    ok("under 18: no 'optional' note", not page.is_visible("#adult-note"))
+    page.fill("#f-parent", "Meera Kulkarni"); page.click("#send-wa")
+    ok("under 18: parent WhatsApp required", "whatsapp" in err(), err())
+    page.fill("#f-phone", "+91 98200 00000"); page.click("#send-wa")
+    ok("under 18: parent Gmail required", "gmail" in err(), err())
+    page.fill("#f-pemail", "meera@example.com"); page.click("#send-wa")
+    ok("non-Gmail parent email rejected", "gmail" in err(), err())
+    page.fill("#f-pemail", "meera.k@gmail.com")
+    page.select_option("#f-gender", "Female"); page.fill("#f-grade", "10th"); page.fill("#f-sphone", "+91 90000 11111")
+    page.fill("#f-saddr1", "B-12, Lotus Apts"); page.fill("#f-saddr2", "Magarpatta"); page.fill("#f-city", "Pune")
+    page.fill("#f-sstate", "Maharashtra"); page.fill("#f-spostal", "411028"); page.fill("#f-country", "India")
     page.fill("#f-exams", "IGCSE")
-    page.fill("#f-city", "Pune"); page.fill("#f-country", "India")
     page.check("input[name=objective][value=Both]")
     page.select_option("#f-mode", "Online")
     page.fill("#f-hours", "3"); page.fill("#f-days", "Mon, Thu"); page.fill("#f-time", "6-7 pm")
-    page.select_option("#f-level", "7"); page.select_option("#f-demo", "Yes"); page.select_option("#f-source", "Word of mouth")
+    page.select_option("#f-level", "7"); page.select_option("#f-demo", "Yes"); page.select_option("#f-source", "Internet Search")
     page.fill("#f-message", "Struggling with surds & indices.")
     page.click("#send-wa")
+    ok("complete form passes", err() == "", err())
     opened = page.evaluate("window.__opened")
     wa = opened[-1] if opened else ""
     decoded = urllib.parse.unquote(wa.split("text=", 1)[-1]) if wa else ""
     ok("WhatsApp link opens wa.me with number", wa.startswith("https://wa.me/919766072237?text="), wa[:60])
-    need = ["Riya Kulkarni", "Female", "2011-05-04", "10th", "IGCSE", "Meera Kulkarni", "+91 98200 00000", "Pune", "India", "Objective: Both", "Online", "Hours per week: 3", "Mon, Thu", "6-7 pm", "Maths level (1-10): 7", "Demo class: Yes", "Word of mouth", "surds & indices"]
+    need = ["Riya Kulkarni", "Female", "2011-05-04", "10th", "riya.k@gmail.com", "+91 90000 11111", "B-12, Lotus Apts, Magarpatta, Pune, Maharashtra, 411028, India",
+            "Meera Kulkarni", "+91 98200 00000", "meera.k@gmail.com", "same as student", "IGCSE", "Objective: Both", "Online", "Hours per week: 3", "Mon, Thu", "6-7 pm",
+            "Maths level (1-10): 7", "Demo class: Yes", "Internet Search", "surds & indices"]
     missing = [n for n in need if n not in decoded]
     ok("WhatsApp message carries every field", not missing, missing)
-    page.fill("#f-pemail", "meera@example.com")
     href = page.evaluate("""() => {
         let got = 'NO_CLICK';
         document.addEventListener('click', e => { if (e.target.closest('#send-mail')) { got = e.target.closest('#send-mail').href; e.preventDefault(); } });
@@ -127,7 +149,17 @@ with sync_playwright() as p:
         return got;
     }""")
     href = urllib.parse.unquote(href)
-    ok("Email button builds mailto with subject+body", href.startswith("mailto:tanmaym88@gmail.com?subject=Mathify enquiry") and "Riya Kulkarni" in href and "meera@example.com" in href, href[:160])
+    ok("Email button builds mailto with subject+body", href.startswith("mailto:tanmaym88@gmail.com?subject=Mathify enquiry") and "Riya Kulkarni" in href and "meera.k@gmail.com" in href, href[:160])
+    # 18+ student: parent fields optional (note shown); needs at least one contact number
+    page.goto(B + "/contact/"); page.evaluate("window.__opened=[]; window.open=(u)=>{window.__opened.push(u)}; 0")
+    page.fill("#f-student", "Aman Shah"); page.fill("#f-dob", "2005-01-10"); page.dispatch_event("#f-dob", "change")
+    page.fill("#f-semail", "aman.shah@gmail.com")
+    ok("18+: 'parent details optional' note shown", page.is_visible("#adult-note") and "optional" in page.inner_text("#adult-note"))
+    ok("18+: parent required markers hidden", page.locator(".preq:visible").count() == 0)
+    page.click("#send-wa")
+    ok("18+: asks for a contact number when none given", "contact number" in err(), err())
+    page.fill("#f-sphone", "+44 7700 900123"); page.click("#send-wa")
+    ok("18+: student's own number is enough (no parent details)", err() == "" and len(page.evaluate("window.__opened")) == 1, err())
 
     # 6b. feedback page open without puzzle; fees + ratings present
     fresh = br.new_context()

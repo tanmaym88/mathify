@@ -30,13 +30,18 @@ with sync_playwright() as p:
     vp.evaluate("window.open=()=>{}")
     vp.fill("#f-student", "Ishaan Rao"); vp.fill("#f-parent", "Kavya Rao"); vp.fill("#f-phone", "98200 11111")
     vp.fill("#f-grade", "10th"); vp.fill("#f-exams", "IGCSE"); vp.select_option("#f-mode", "Offline (Magarpatta, Pune)")
-    vp.fill("#f-hours", "3"); vp.fill("#f-semail", "ishaan@example.com"); vp.fill("#f-pemail", "kavya@example.com")
+    vp.fill("#f-hours", "3"); vp.fill("#f-semail", "ishaan.rao@gmail.com"); vp.fill("#f-pemail", "kavya.rao@gmail.com")
+    vp.fill("#f-dob", "2010-06-01"); vp.fill("#f-sphone", "90000 22222"); vp.fill("#f-saddr1", "C-4, Iris"); vp.fill("#f-city", "Pune"); vp.fill("#f-spostal", "411028")
     with vp.expect_response(lambda r: "/api/enquiries" in r.url) as resp:
         vp.click("#send-wa")
     ok("website enquiry saved to app", resp.value.status == 201, resp.value.status)
     # bot with honeypot filled is silently ignored
     r = vp.request.post(B + "/api/enquiries", data={"student": "Bot", "parent": "Bot", "phone": "1", "website": "spam"})
     ok("honeypot enquiry accepted but not stored", r.status == 200)
+    r = vp.request.post(B + "/api/enquiries", data={"student": "X", "dob": "2012-01-01", "semail": "x@yahoo.com", "parent": "P", "phone": "9820000000", "pemail": "p@gmail.com"})
+    ok("server rejects non-Gmail student email", r.status == 400, r.status)
+    r = vp.request.post(B + "/api/enquiries", data={"student": "X", "dob": "2012-01-01", "semail": "x@gmail.com"})
+    ok("server requires parent details for under-18", r.status == 400, r.status)
     v.close()
 
     # ---------- 2. anonymous app = login screen ----------
@@ -60,9 +65,11 @@ with sync_playwright() as p:
     ok("bot enquiry not listed", "Bot" not in pg.inner_text("main"))
     pg.click("[data-convert]"); pg.wait_for_selector("#sform")
     ok("Create student opens full form with enquiry picked", pg.eval_on_selector("#enq-pick", "e => e.options[e.selectedIndex].text").startswith("Ishaan Rao"))
-    ok("form prefilled with student email", pg.input_value("#f-email") == "ishaan@example.com")
+    ok("form prefilled with student email", pg.input_value("#f-email") == "ishaan.rao@gmail.com")
     ok("converted student carries parent + phone", pg.input_value("#f-parent_name") == "Kavya Rao" and pg.input_value("#f-phone") == "98200 11111")
     ok("mode mapped to Offline", pg.input_value("#f-mode") == "Offline")
+    ok("student phone, address and DOB carried from enquiry", pg.input_value("#f-student_phone") == "90000 22222" and pg.input_value("#f-address_line1") == "C-4, Iris" and pg.input_value("#f-postal_code") == "411028" and pg.input_value("#f-dob") == "2010-06-01")
+    ok("parent address 'Same as student' carried", pg.input_value("#f-parent_address") == "Same as student")
     pg.click("#save")
     ok("fee required", "Fee per hour is required" in pg.inner_text("#ferr"))
     pg.fill("#f-fee_per_hour", "800")
@@ -178,7 +185,7 @@ with sync_playwright() as p:
     pp = par.new_page()
     perr = []
     pp.on("pageerror", lambda e: perr.append(str(e)))
-    pp.goto(B + "/api/auth/dev?email=kavya@example.com"); pp.wait_for_selector("text=Monthly fees")
+    pp.goto(B + "/api/auth/dev?email=kavya.rao@gmail.com"); pp.wait_for_selector("text=Monthly fees")
     t = pp.inner_text("main")
     ok("parent sees child's fees", "Ishaan Rao" in t and "₹2,000" in t and "Part paid" in t)
     ok("parent sees classes", "Late cancel (charged)" in t)

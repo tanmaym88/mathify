@@ -120,6 +120,8 @@ const STUDENT_FIELDS = {
   grade: v => str(v, 40), exams: v => str(v, 200), mode: v => str(v, 40),
   hours_per_week: v => num(v, { max: 40 }), maths_level: v => num(v, { min: 1, max: 10, int: true }),
   objective: v => str(v, 120), city: v => str(v, 80), country: v => str(v, 80),
+  student_phone: v => str(v, 40), address_line1: v => str(v, 160), address_line2: v => str(v, 160),
+  state: v => str(v, 80), postal_code: v => str(v, 20), parent_address: v => str(v, 400),
   fee_per_hour: v => num(v, { max: 100000, int: true }), notes: v => str(v, 2000),
   is_active: v => (v === undefined ? undefined : (v ? 1 : 0))
 };
@@ -210,8 +212,19 @@ async function invoiceData(env, sid, month) {
 }
 
 /* ---------------- enquiries ---------------- */
-const ENQ_FIELDS = ['student', 'gender', 'dob', 'grade', 'exams', 'semail', 'parent', 'phone', 'pemail', 'city', 'country',
+const ENQ_FIELDS = ['student', 'gender', 'dob', 'grade', 'exams', 'semail', 'sphone',
+  'saddr1', 'saddr2', 'city', 'sstate', 'spostal', 'country',
+  'parent', 'phone', 'pemail', 'psame', 'paddr1', 'paddr2', 'pcity', 'pstate', 'ppostal', 'pcountry',
   'objective', 'mode', 'hours', 'days', 'time', 'level', 'demo', 'source', 'message'];
+const GMAIL = /^[^\s@]+@(gmail|googlemail)\.com$/i;
+function ageOn(dob, now = new Date()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob || '');
+  if (!m) return null;
+  let a = now.getUTCFullYear() - +m[1];
+  if (now.getUTCMonth() + 1 < +m[2] || (now.getUTCMonth() + 1 === +m[2] && now.getUTCDate() < +m[3])) a--;
+  return a;
+}
+const digits = v => String(v || '').replace(/\D/g, '').length;
 
 /* ---------------- router ---------------- */
 const routes = [];
@@ -438,7 +451,15 @@ route('POST', '/api/enquiries', async ({ env, request }) => {
   if (b.website) return json({ ok: true }); // honeypot: bots fill hidden fields
   const data = {};
   for (const k of ENQ_FIELDS) { const v = str(b[k], k === 'message' ? 2000 : 200); if (v) data[k] = v; }
-  if (!data.student || !data.parent || !data.phone) bad("Student's name, parent's name and WhatsApp number are required");
+  // Same rules as the website form (assets/contact.js)
+  if (!data.student) bad("Student's name is required");
+  const age = ageOn(data.dob);
+  if (age === null || age < 2 || age > 100) bad("A valid date of birth is required");
+  if (!GMAIL.test(data.semail || '')) bad("The student's email must be a Gmail address");
+  if (data.pemail && !GMAIL.test(data.pemail)) bad("The parent/guardian's email must be a Gmail address");
+  if (age < 18) {
+    if (!data.parent || digits(data.phone) < 8 || !data.pemail) bad("Parent/guardian's name, WhatsApp number and Gmail are required for students under 18");
+  } else if (digits(data.phone) < 8 && digits(data.sphone) < 8) bad('A contact number is required');
   const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM enquiries WHERE created_at > datetime('now','-1 hour')").first();
   if (recent.n >= 30) throw new HttpError(429, 'Too many enquiries right now — please WhatsApp instead.');
   await env.DB.prepare('INSERT INTO enquiries (data) VALUES (?)').bind(JSON.stringify(data)).run();
@@ -472,7 +493,10 @@ route('POST', '/api/enquiries/:id/convert', async ({ user, env, params, request 
     gender: d.gender, grade: d.grade, exams: d.exams, mode: d.mode,
     hours_per_week: parseFloat(d.hours) > 0 && parseFloat(d.hours) <= 40 ? parseFloat(d.hours) : null,
     maths_level: parseInt(d.level) >= 1 && parseInt(d.level) <= 10 ? parseInt(d.level) : null,
-    objective: d.objective, city: d.city, country: d.country
+    objective: d.objective, city: d.city, country: d.country,
+    student_phone: d.sphone, address_line1: d.saddr1, address_line2: d.saddr2, state: d.sstate, postal_code: d.spostal,
+    parent_address: d.psame ? (d.parent || d.phone ? 'Same as student' : null)
+      : [d.paddr1, d.paddr2, d.pcity, d.pstate, d.ppostal, d.pcountry].filter(Boolean).join(', ') || null
   };
   for (const k of Object.keys(fromEnquiry)) if (fromEnquiry[k] == null || fromEnquiry[k] === '') delete fromEnquiry[k];
   if (fromEnquiry.mode) fromEnquiry.mode = /offline/i.test(fromEnquiry.mode) ? 'Offline' : /online/i.test(fromEnquiry.mode) ? 'Online' : fromEnquiry.mode;
