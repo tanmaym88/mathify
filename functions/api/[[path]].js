@@ -168,10 +168,13 @@ async function getStudent(env, sid) {
 // runs on the live database (the extra fields simply aren't saved until it does).
 let studentCols = null;
 async function knownStudentKeys(env, s) {
-  if (!studentCols) {
+  const load = async () => {
     const { results } = await env.DB.prepare('PRAGMA table_info(students)').all();
     studentCols = new Set(results.map(r => r.name));
-  }
+  };
+  if (!studentCols) await load();
+  // A column may have been added since this server instance started — re-check before dropping anything.
+  if (Object.keys(s).some(k => !studentCols.has(k))) await load();
   return Object.keys(s).filter(k => studentCols.has(k));
 }
 
