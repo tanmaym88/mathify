@@ -149,8 +149,8 @@ about = """    <div class="page">
 
         <h2>Presence</h2>
         <ul>
-          <li><strong>Online:</strong> The student can join online classes that are run through iPad and Zoom (with screen-share), from anywhere in <strong>India, rest of Asia, Europe, Australia</strong> and <strong>Africa.</strong> The currently enrolled students reside in UK, Sydney, Dubai and India.</li>
-          <li><strong>Offline:</strong> The student needs to come to the teacher's place in <strong>Magarpatta, Pune</strong>, India. The students that are currently enrolled in the offline classes come from Magarpatta City and Amanora Township.</li>
+          <li><strong>Online:</strong> The student can join online classes that are run through iPad and Google Meet or Zoom (with screen-share), from anywhere in India, rest of Asia, Europe, Australia and Africa. It is recommended (but not mandatory) that the student has a tablet to write and share his workings.</li>
+          <li><strong>Offline:</strong> The student needs to come to the teacher's place in Magarpatta, Pune, India.</li>
         </ul>
 
         <h2>Feedback</h2>
