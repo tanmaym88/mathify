@@ -49,6 +49,8 @@ with sync_playwright() as p:
     pg = a.new_page()
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
+    csp = []
+    pg.on("console", lambda m: csp.append(m.text) if "Content Security Policy" in m.text else None)
     pg.goto(B + "/app/"); pg.wait_for_selector("text=Sign in with Google")
     ok("anonymous sees Google sign-in", pg.locator("a[href='/api/auth/login']").count() == 1)
     pg.goto(B + "/api/auth/dev?email=stranger@example.com"); pg.wait_for_selector(".login")
@@ -188,6 +190,15 @@ with sync_playwright() as p:
     pg.click(".preview-banner >> text=Back to admin"); pg.wait_for_selector("text=Student view")
     ok("back to admin from preview", "/students/" in pg.url)
     ok("no JS errors (admin)", not errors, errors)
+    ok("no security-policy blocks in the app", not csp, csp)
+    h = pg.request.get(B + "/contact/").headers
+    ok("pages send security headers", "frame-ancestors 'none'" in h.get("content-security-policy", "") and h.get("x-content-type-options") == "nosniff" and "max-age" in h.get("strict-transport-security", ""), h)
+    cp = a.new_page(); cspc = []
+    cp.on("console", lambda m: cspc.append(m.text) if "Content Security Policy" in m.text else None)
+    for path in ["/", "/aptitude-test/", "/fees-and-schedule/", "/testimonials/", "/contact/"]:
+        cp.goto(B + path); cp.wait_for_load_state("load")
+    ok("no security-policy blocks on site pages", not cspc, cspc)
+    cp.close()
 
     # ---------- 8. parent view ----------
     par = br.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, accept_downloads=True); no_fonts(par)

@@ -6,7 +6,7 @@ import {
 
 /* ---------------- helpers ---------------- */
 const json = (data, status = 200, headers = {}) =>
-  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers } });
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...headers } });
 const fail = (status, error) => json({ error }, status);
 class HttpError extends Error { constructor(status, msg) { super(msg); this.status = status; } }
 const bad = msg => { throw new HttpError(400, msg); };
