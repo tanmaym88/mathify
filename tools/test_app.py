@@ -225,6 +225,16 @@ with sync_playwright() as p:
     # ---------- 10. sign out ----------
     pg.goto(B + "/app/"); pg.wait_for_selector("#logout"); pg.click("#logout"); pg.wait_for_selector("text=Sign in with Google")
     ok("sign out returns to login", pg.request.get(B + "/api/me").status == 401)
+    # per-visitor enquiry limit: 5 per hour from one visitor, then politely refused
+    lim = br.new_context(); lr = lim.request
+    valid = {"student": "Limit Test", "gender": "Male", "dob": "2010-01-01", "semail": "limit.test@gmail.com", "sphone": "9820012345",
+             "parent": "P", "phone": "9820000000", "pemail": "p.test@gmail.com"}
+    codes = [lr.post(B + "/api/enquiries", data=valid).status for _ in range(6)]
+    ok("per-visitor limit: extra enquiries refused (429)", codes.count(201) <= 5 and codes[-1] == 429, codes)
+    adm = br.new_context(); adm.new_page().goto(B + "/api/auth/dev?email=tanmaym88@gmail.com")
+    stored = adm.request.get(B + "/api/enquiries").json()["enquiries"]; adm.close()
+    ok("visitor id stored as a hash, not the address", all(len(e["data"].get("_v", "")) == 16 for e in stored if e["data"].get("student") == "Limit Test"))
+    lim.close()
     br.close()
 
 fails = [r for r in results if not r[1]]

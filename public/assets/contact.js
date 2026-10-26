@@ -163,6 +163,22 @@
     return true;
   }
 
+  // Cloudflare Turnstile human check (only if a site key is configured on the page).
+  var tsBox = document.getElementById('human-check'), tsId = null;
+  var siteKey = tsBox && tsBox.getAttribute('data-sitekey');
+  if (siteKey) {
+    window.mathifyTurnstile = function () {
+      tsId = window.turnstile.render(tsBox, { sitekey: siteKey, appearance: 'interaction-only', action: 'enquiry' });
+    };
+    var sc = document.createElement('script');
+    sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=mathifyTurnstile';
+    sc.async = true; sc.defer = true;
+    document.head.appendChild(sc);
+  }
+  function turnstileToken() {
+    try { return (tsId !== null && window.turnstile) ? window.turnstile.getResponse(tsId) || '' : ''; } catch (e) { return ''; }
+  }
+
   // Save a copy of the enquiry to Mathify's app (once per page visit). Fails silently — the
   // WhatsApp / email message still goes out either way.
   var saved = false;
@@ -173,6 +189,7 @@
     FIELDS.forEach(function (f) { if (included(f[0]) && val(f[0])) data[f[0]] = val(f[0]); });
     if (val('message')) data.message = val('message');
     data.website = val('website'); // honeypot
+    data.turnstile = turnstileToken();
     try {
       fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true })
         .catch(function () {});

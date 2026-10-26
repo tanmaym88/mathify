@@ -426,3 +426,5 @@ label.check input { width: auto; }
 #paddr { margin-top: 12px; }
 .adult-note { background: #fff6d6; border-left: 4px solid var(--orange); border-radius: 6px; padding: 8px 12px; margin: 0 0 12px; font-weight: 700; color: var(--navy); font-size: .95rem; }
 [hidden] { display: none !important; }
+#human-check { margin: 4px 0 10px; }
+#human-check:empty { margin: 0; }

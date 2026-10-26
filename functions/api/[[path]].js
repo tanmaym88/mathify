@@ -473,6 +473,12 @@ route('GET', '/api/students/:id/invoice/:month', async ({ user, env, params }) =
   return json(await invoiceData(env, sid, params.month));
 });
 
+async function visitorHash(request, env) {
+  const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'local';
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode((env.SESSION_SECRET || '') + '|' + ip));
+  return [...new Uint8Array(buf)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
 // --- enquiries (website form → database)
 route('POST', '/api/enquiries', async ({ env, request }) => {
   const b = await body(request);
@@ -490,8 +496,23 @@ route('POST', '/api/enquiries', async ({ env, request }) => {
   if (age < 18) {
     if (!data.parent || digits(data.phone) < 8 || !data.pemail) bad("Parent/guardian's name, WhatsApp number and Gmail are required for students under 18");
   }
+  // Human check (Cloudflare Turnstile) — active once the TURNSTILE_SECRET secret is set in Cloudflare.
+  if (env.TURNSTILE_SECRET) {
+    const form = new FormData();
+    form.append('secret', env.TURNSTILE_SECRET);
+    form.append('response', str(b.turnstile, 2048) || '');
+    const ip = request.headers.get('CF-Connecting-IP'); if (ip) form.append('remoteip', ip);
+    const v = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form })
+      .then(r => r.json()).catch(() => ({ success: false }));
+    if (!v.success) throw new HttpError(403, 'Human check failed — please try again, or WhatsApp instead.');
+  }
+  // Limits: 5 per visitor per hour (by a one-way hash of their internet address, not the address itself),
+  // and 60 per hour overall as a backstop.
+  data._v = await visitorHash(request, env);
+  const mine = await env.DB.prepare("SELECT COUNT(*) AS n FROM enquiries WHERE created_at > datetime('now','-1 hour') AND json_extract(data, '$._v') = ?").bind(data._v).first();
+  if (mine.n >= 5) throw new HttpError(429, 'You have sent several enquiries already — please WhatsApp instead.');
   const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM enquiries WHERE created_at > datetime('now','-1 hour')").first();
-  if (recent.n >= 30) throw new HttpError(429, 'Too many enquiries right now — please WhatsApp instead.');
+  if (recent.n >= 60) throw new HttpError(429, 'Too many enquiries right now — please WhatsApp instead.');
   await env.DB.prepare('INSERT INTO enquiries (data) VALUES (?)').bind(JSON.stringify(data)).run();
   return json({ ok: true }, 201);
 });
