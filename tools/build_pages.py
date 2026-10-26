@@ -97,7 +97,7 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
 
 # ---------------- Welcome ----------------
 welcome = """    <section class="hero">
-      <h1>Welcome to the world of learning Mathematics!</h1>
+      <h1>Welcome to the world of learning K12 Mathematics!</h1>
     </section>
     <div class="tiles">
       <a class="tile" href="/why-maths"><strong>Why Maths!?</strong><span>Where Maths shows up — from engineering and AI to patterns in nature.</span></a>
