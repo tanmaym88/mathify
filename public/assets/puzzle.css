@@ -36,7 +36,7 @@
 #cop-overlay { position: fixed; inset: 0; background: rgba(20,25,35,.55); display: none; align-items: center; justify-content: center; z-index: 9000; padding: 16px; }
 #cop-overlay.show { display: flex; }
 #cop-overlay .cop-modal { background: #fff; color: #000; border-radius: 20px; padding: 28px 24px; max-width: 420px; width: 100%; text-align: center; animation: cop-pop .35s ease-out; font-family: system-ui, sans-serif; }
-#cop-overlay .cop-modal h2 { margin: 0 0 8px; font-size: 2rem; color: #000; }
+#cop-overlay .cop-modal h2 { margin: 0 0 8px; font-size: 2rem; color: #2f3192; }
 #cop-overlay .cop-ghost { background: #e4e5f6; color: #000; }
 @keyframes cop-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .cop-confetti { position: fixed; top: -30px; font-size: 22px; pointer-events: none; z-index: 9100; animation: cop-fall linear forwards; }

@@ -435,3 +435,6 @@ label.check input { width: auto; }
 /* Brand typography: headings in Lexend */
 h1, h2, h3, h4, .page-title, legend, .subhead, .stat b, .tile strong { font-family: var(--font-display); letter-spacing: -0.01em; }
 h2, h3, h4 { font-weight: 600; }
+
+/* Brand: all headings are navy (body text stays black) */
+h1, h2, h3, h4, .hero h1, .page-title, .card h2, .prose h2, legend, .subhead, .tile strong { color: var(--navy); }
