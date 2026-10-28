@@ -102,7 +102,7 @@ welcome = """    <section class="hero">
     <div class="tiles">
       <a class="tile" href="/why-maths"><strong>Why Maths!?</strong><span>Where Maths shows up — from engineering and AI to patterns in nature.</span></a>
       <a class="tile" href="/about-mathify"><strong>About Mathify</strong><span>Who the classes are for, how they run, online and offline.</span></a>
-      <a class="tile" href="/about-the-teacher"><strong>The Teacher</strong><span>Tanmay Mogra — IIT alumnus, JEE AIR 328, 9+ years of teaching.</span></a>
+      <a class="tile" href="/about-the-teacher"><strong>The Teacher</strong><span>Tanmay Mogra — IIT alumnus, JEE AIR 328, 10+ years of teaching.</span></a>
       <a class="tile" href="/fees-and-schedule"><strong>Fees and Schedule</strong><span>Hourly billing, weekly schedule and the rescheduling policy.</span></a>
       <a class="tile" href="/testimonials"><strong>Testimonials</strong><span>What parents and students across India, UK and UAE say.</span></a>
       <a class="tile" href="/aptitude-test"><strong>Aptitude Test</strong><span>A quick picture puzzle. Can you crack the order?</span></a>
@@ -174,11 +174,11 @@ teacher = """    <div class="page">
       <div class="card teacher">
         <img src="/images/teacher.webp" alt="Tanmay Mogra" width="360" height="360">
         <div>
-          <p>Mathify is primarily run by Tanmay Mogra, an <strong class="hl">IIT alumnus</strong> and a Mathematics Teacher having a teaching experience of 9+ years. He cleared the Joint Entrance Exam (JEE Advanced - touted to be one of the toughest undergraduate entrance exams in the world) in 2007, with an <strong class="hl">All India Rank of 328</strong>. He has a very strong hold of High School Maths Topics that are taught <strong>across the globe</strong>, which he learnt while preparing for the IITJEE, and from his own self-study and experience. He has taught 500+ students at prominent coaching institutes in India, and in private for students across countries <strong>(USA, UK, UAE, Singapore, India),</strong> and across curricula <strong>(JEE, IBDP, IGCSE, ICSE, ISC, CBSE)</strong>. He is very passionate about both Maths and Teaching, and has developed a great knack for teaching students in an enjoyable way.</p>
+          <p>Mathify is primarily run by Tanmay Mogra, an <strong class="hl">IIT alumnus</strong> and a Mathematics Teacher having a teaching experience of 10+ years. He cleared the Joint Entrance Exam (JEE Advanced - touted to be one of the toughest undergraduate entrance exams in the world) in 2007, with an <strong class="hl">All India Rank of 328</strong>. He has a very strong hold of High School Maths Topics that are taught <strong>across the globe</strong>, which he learnt while preparing for the IITJEE, and from his own self-study and experience. He has taught 500+ students at prominent coaching institutes in India, and in private for students across countries <strong>(USA, UK, UAE, Singapore, India),</strong> and across curricula <strong>(JEE, IBDP, IGCSE, ICSE, ISC, CBSE)</strong>. He is very passionate about both Maths and Teaching, and has developed a great knack for teaching students in an enjoyable way.</p>
         </div>
       </div>
     </div>"""
-page("/about-the-teacher", "The Teacher", "Tanmay Mogra — IIT alumnus, JEE Advanced AIR 328, Maths teacher with 9+ years of experience.", teacher, current="/about-the-teacher")
+page("/about-the-teacher", "The Teacher", "Tanmay Mogra — IIT alumnus, JEE Advanced AIR 328, Maths teacher with 10+ years of experience.", teacher, current="/about-the-teacher")
 
 # ---------------- Fees ----------------
 fees = """    <div class="page">
