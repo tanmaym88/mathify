@@ -433,5 +433,5 @@ label.check input { width: auto; }
 #human-check:empty { margin: 0; }
 
 /* Brand typography: headings in Lexend */
-h1, h2, h3, h4, .page-title, legend, .subhead, .stat b { font-family: var(--font-display); letter-spacing: -0.01em; }
+h1, h2, h3, h4, .page-title, legend, .subhead, .stat b, .tile strong { font-family: var(--font-display); letter-spacing: -0.01em; }
 h2, h3, h4 { font-weight: 600; }

@@ -68,7 +68,7 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
 <body>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="Main">
-      <a class="brand" href="/"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="142" height="40"></a>
+      <a class="brand" href="/"><img class="brand-lockup" src="/brand/mathify-logo-horizontal-navy.svg" alt="Mathify" width="142" height="40"></a>
       <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
       <ul class="nav-menu">{nav_html(current)}</ul>
     </nav>

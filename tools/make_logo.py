@@ -143,6 +143,7 @@ def main():
     hz, ratio = horizontal()
     write("mathify-logo-horizontal.svg", hz)
     write("mathify-logo-horizontal-white.svg", horizontal("white")[0])
+    write("mathify-logo-horizontal-navy.svg", horizontal("yellow")[0])   # for the yellow navbars
     write("mathify-logo-horizontal-yellow.svg", horizontal("yellow", pad=300, bg=YELLOW)[0])
     write("mathify-logo-stacked.svg", stacked())
     write("mathify-logo-stacked-yellow.svg", stacked("yellow", square=True, bg=YELLOW))
