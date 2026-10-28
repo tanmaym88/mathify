@@ -83,7 +83,7 @@ B, T = Font(BOLD), Font(SEMI)
 
 def wordmark(cap, scheme):
     math_c, ify_c, plus_c = {"colour": (NAVY, ORANGE, ORANGE), "white": (WHITE, ORANGE, ORANGE),
-                             "yellow": (NAVY, NAVY, ORANGE)}[scheme]
+                             "yellow": (NAVY, NAVY, NAVY)}[scheme]
     return text_paths(B, "Mathify", cap, [math_c] * 4 + [ify_c] * 3, tracking=-12, plus_dot=plus_c)
 
 
