@@ -2,8 +2,7 @@
 """Builds every Mathify logo file from the bulb icon + the "Mathify" wordmark.
 
 Wordmark: Lexend ExtraBold (a typeface designed for easier reading — fitting for a teaching brand),
-"Math" in navy, "ify" in orange, and the dot of the i replaced by a plus sign that echoes the plus
-in the bulb. Stacked lockups add the tagline MATHS SIMPLIFIED.
+"Math" in navy, "ify" in orange, and the dot of the i is an orange circle (the same orange as the π in the bulb). Stacked lockups add the tagline MATHS SIMPLIFIED.
 
 Run:  python3 tools/make_logo.py        (needs: pip install fonttools brotli; Playwright for PNGs)
 Writes public/brand/*.svg|png, public/assets/logo-invoice*.png.
@@ -70,10 +69,8 @@ def text_paths(font, text, cap_px, colours, tracking=0, plus_dot=None):
         if ch == "i" and plus_dot:
             dot = max(cs, key=lambda c: bbox(c)[1]); cs = [c for c in cs if c is not dot]
             x0, y0, x1, y1 = bbox(dot); w = (x1 - x0) * s
-            cx, cy = ((x0 + x1) / 2 + x) * s, -((y0 + y1) / 2) * s + w * 0.04
-            L, T = w * 1.06, w * 0.36; r = T * 0.22
-            extra.append(f'<g fill="{plus_dot}"><rect x="{cx-L/2:.1f}" y="{cy-T/2:.1f}" width="{L:.1f}" height="{T:.1f}" rx="{r:.1f}"/>'
-                         f'<rect x="{cx-T/2:.1f}" y="{cy-L/2:.1f}" width="{T:.1f}" height="{L:.1f}" rx="{r:.1f}"/></g>')
+            cx, cy = ((x0 + x1) / 2 + x) * s, -((y0 + y1) / 2) * s
+            extra.append(f'<circle fill="{plus_dot}" cx="{cx:.1f}" cy="{cy:.1f}" r="{w*0.5:.1f}"/>')
         for c in cs: by_col.setdefault(col, []).append(path_d(c, x, s))
         x += font.adv(ch) + (tracking if i < len(text) - 1 else 0)
     last = text[-1]; width = (x - font.adv(last) + bbox([a for c in font.contours(last) for a in c])[2]) * s
