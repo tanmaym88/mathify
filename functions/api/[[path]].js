@@ -479,6 +479,80 @@ async function visitorHash(request, env) {
   return [...new Uint8Array(buf)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
+// --- Google Calendar feed (iCal subscription of each active student's weekly schedule)
+// Private address: /api/calendar/<token>.ics. The token is derived from SESSION_SECRET, so it never
+// needs storing; rotating SESSION_SECRET (or setting CALENDAR_SALT) gives a new address.
+async function calendarToken(env) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.SESSION_SECRET || ''), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('mathify-calendar|' + (env.CALENDAR_SALT || 'v1')));
+  return [...new Uint8Array(sig)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+const ICS_DAY = { Mon: 'MO', Tue: 'TU', Wed: 'WE', Thu: 'TH', Fri: 'FR', Sat: 'SA', Sun: 'SU' };
+const icsText = v => String(v ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+function icsFold(line) {                       // RFC 5545: lines over 75 octets continue with a leading space
+  const bytes = new TextEncoder().encode(line);
+  if (bytes.length <= 75) return line;
+  const out = []; let cur = '', n = 0;
+  for (const ch of line) {
+    const len = new TextEncoder().encode(ch).length;
+    if (n + len > (out.length ? 74 : 75)) { out.push(cur); cur = ''; n = 0; }
+    cur += ch; n += len;
+  }
+  out.push(cur);
+  return out.join('\r\n ');
+}
+
+function buildCalendar(students, now = new Date()) {
+  // Series start on the first matching weekday on/after a fixed anchor, so past weeks stay put.
+  const ANCHOR = Date.UTC(2026, 9, 26);       // Mon 26 Oct 2026
+  const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Mathify//Classes//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'X-WR-CALNAME:Mathify classes', 'X-WR-TIMEZONE:Asia/Kolkata', 'REFRESH-INTERVAL;VALUE=DURATION:PT1H', 'X-PUBLISHED-TTL:PT1H',
+    'BEGIN:VTIMEZONE', 'TZID:Asia/Kolkata', 'BEGIN:STANDARD', 'DTSTART:19700101T000000', 'TZOFFSETFROM:+0530', 'TZOFFSETTO:+0530', 'TZNAME:IST', 'END:STANDARD', 'END:VTIMEZONE'
+  ];
+  const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  for (const s of students) {
+    const sched = typeof s.schedule === 'string' ? JSON.parse(s.schedule || '{}') : (s.schedule || {});
+    for (const day of order) {
+      const slot = sched[day];
+      if (!slot || !isTime(slot.from) || !isTime(slot.to)) continue;
+      const anchorDow = (new Date(ANCHOR).getUTCDay() + 6) % 7;          // Mon = 0
+      const first = new Date(ANCHOR + ((order.indexOf(day) - anchorDow + 7) % 7) * 86400000);
+      const ymd = first.toISOString().slice(0, 10).replace(/-/g, '');
+      const t = v => v.replace(':', '') + '00';
+      const details = [s.grade && `Grade: ${s.grade}`, s.exams && `Exams: ${s.exams}`, s.mode && `Mode: ${s.mode}`].filter(Boolean).join('\n');
+      lines.push('BEGIN:VEVENT',
+        `UID:student-${s.id}-${day}@mathify.world`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;TZID=Asia/Kolkata:${ymd}T${t(slot.from)}`,
+        `DTEND;TZID=Asia/Kolkata:${ymd}T${t(slot.to)}`,
+        `RRULE:FREQ=WEEKLY;BYDAY=${ICS_DAY[day]}`,
+        `SUMMARY:${icsText('Maths class · ' + s.name)}`,
+        ...(s.mode ? [`LOCATION:${icsText(s.mode)}`] : []),
+        ...(details ? [`DESCRIPTION:${icsText(details)}`] : []),
+        'END:VEVENT');
+    }
+  }
+  lines.push('END:VCALENDAR');
+  return lines.map(icsFold).join('\r\n') + '\r\n';
+}
+
+route('GET', '/api/calendar/:file', async ({ env, params }) => {
+  const token = await calendarToken(env);
+  if (!env.SESSION_SECRET || params.file !== token + '.ics') return fail(404, 'Not found');
+  const { results } = await env.DB.prepare('SELECT id, name, grade, exams, mode, schedule FROM students WHERE is_active = 1 ORDER BY name').all();
+  return new Response(buildCalendar(results), {
+    headers: { 'Content-Type': 'text/calendar; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex' }
+  });
+});
+
+route('GET', '/api/calendar-link', async ({ user, env, url }) => {
+  requireAdmin(user);
+  return json({ url: `${url.origin}/api/calendar/${await calendarToken(env)}.ics` });
+});
+
 // --- enquiries (website form → database)
 route('POST', '/api/enquiries', async ({ env, request }) => {
   const b = await body(request);
@@ -574,7 +648,7 @@ export async function onRequest({ request, env }) {
       const m = url.pathname.match(r.re);
       if (!m) continue;
       const params = Object.fromEntries(r.keys.map((k, i) => [k, decodeURIComponent(m[i + 1])]));
-      const needsUser = !url.pathname.startsWith('/api/auth/') && !(r.method === 'POST' && url.pathname === '/api/enquiries');
+      const needsUser = !url.pathname.startsWith('/api/auth/') && !url.pathname.startsWith('/api/calendar/') && !(r.method === 'POST' && url.pathname === '/api/enquiries');
       const user = needsUser ? await currentUser(request, env) : null;
       return await r.handler({ request, env, url, params, user });
     }

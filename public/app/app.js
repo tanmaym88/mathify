@@ -188,7 +188,29 @@
             <div class="row"><span class="money">${inr(x.balance)}</span>
               ${x.phone ? `<a class="btn small wa" target="_blank" rel="noopener" href="https://wa.me/${waNumber(x.phone)}?text=${encodeURIComponent(`Hello, a gentle reminder from Mathify: fees of ${inr(x.balance)} for ${monthName(x.month)} (${x.name}) are due. Thank you!`)}">Remind</a>` : ''}</div>
           </div>`).join('') : '<p class="empty">Nothing due. 🎉</p>'}
+      </div>
+      <div class="card"><h2>Google Calendar</h2>
+        <p class="hint">Show every student's weekly class timings in your Google Calendar. It updates by itself when you change a schedule or deactivate a student (Google refreshes it every few hours).</p>
+        <div id="cal-box"><button class="btn small secondary" id="cal-show">Get my calendar link</button></div>
       </div>`;
+    $('#cal-show').onclick = async () => {
+      try {
+        const { url } = await api('/calendar-link');
+        $('#cal-box').innerHTML = `
+          <label for="cal-url">Private calendar address (keep it to yourself)</label>
+          <div class="row"><input id="cal-url" readonly value="${esc(url)}" style="flex:1;min-width:0">
+          <button class="btn small" id="cal-copy">Copy</button></div>
+          <ol class="hint" style="margin:10px 0 0;padding-left:1.2em">
+            <li>Open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar → Add calendar → From URL</a> on a computer.</li>
+            <li>Paste the address and click <b>Add calendar</b>. A calendar called “Mathify classes” appears on your phone too.</li>
+          </ol>`;
+        $('#cal-url').onclick = e => e.target.select();
+        $('#cal-copy').onclick = async () => {
+          try { await navigator.clipboard.writeText(url); toast('Calendar address copied'); }
+          catch { $('#cal-url').select(); toast('Select the address and copy it', true); }
+        };
+      } catch (e) { toast(e.message, true); }
+    };
     $$('[data-end]').forEach(b => b.onclick = () => endClassModal(Number(b.dataset.end), b.dataset.start));
     $$('[data-restart]').forEach(b => b.onclick = () => changeStartModal(Number(b.dataset.restart), b.dataset.start));
     $$('[data-start-class]').forEach(b => b.onclick = () => startClassModal(Number(b.dataset.startClass)));

@@ -101,6 +101,17 @@ with sync_playwright() as p:
     # ---------- 5. today: start + end class ----------
     pg.click(".tabs >> text=Today"); pg.wait_for_selector("[data-start-class]")
     ok("today lists scheduled class", "Ishaan Rao" in pg.inner_text("main") and "17:00–18:00" in pg.inner_text("main"))
+
+    # Google Calendar feed
+    pg.click("#cal-show"); pg.wait_for_selector("#cal-url")
+    cal_url = pg.input_value("#cal-url")
+    ok("calendar link shown to admin", "/api/calendar/" in cal_url and cal_url.endswith(".ics"), cal_url)
+    r = a.request.get(cal_url)
+    ics = r.text()
+    ok("calendar feed is iCal", r.status == 200 and "text/calendar" in r.headers.get("content-type", "") and ics.startswith("BEGIN:VCALENDAR"), r.status)
+    ok("calendar has the weekly class", "SUMMARY:Maths class · Ishaan Rao" in ics and "RRULE:FREQ=WEEKLY;BYDAY=" in ics and "T170000" in ics and "TZID=Asia/Kolkata" in ics, ics[:600])
+    ok("calendar lines use CRLF", "\r\n" in ics and all(len(l.encode()) <= 75 for l in ics.split("\r\n")))
+    ok("wrong calendar token is 404", a.request.get(B + "/api/calendar/" + "0" * 32 + ".ics").status == 404)
     pg.click("[data-start-class]"); pg.wait_for_selector("#m-start")
     ok("start class asks for time (pre-filled with now)", len(pg.input_value("#m-start")) == 5)
     pg.fill("#m-start", "06:10"); pg.click("#modal-form button[value=ok]"); pg.wait_for_selector("[data-end]")
@@ -206,6 +217,7 @@ with sync_playwright() as p:
     perr = []
     pp.on("pageerror", lambda e: perr.append(str(e)))
     pp.goto(B + "/api/auth/dev?email=kavya.rao@gmail.com"); pp.wait_for_selector("text=Monthly fees")
+    ok("parents cannot get the calendar link", pp.request.get(B + "/api/calendar-link").status == 403)
     t = pp.inner_text("main")
     ok("parent sees child's fees", "Ishaan Rao" in t and "₹2,000" in t and "Part paid" in t)
     ok("parent sees classes", "Late cancel (charged)" in t)

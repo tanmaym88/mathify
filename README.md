@@ -75,6 +75,7 @@ Under **Cloudflare → your Pages project → Settings → Variables and secrets
 - **Website pages:** edit `tools/build_pages.py` (shared header/footer) and run `npm run build:pages`, or edit the HTML directly.
 - **Home-page puzzle:** optional (visitors can skip it). To make it compulsory again, set `REQUIRED = true` at the top of `public/assets/gate.js`.
 - **New student field (address, phone, anything):** add one line to `DETAIL_DEFS` in `public/app/app.js`. It's stored in the student's flexible `details` (JSON), so no database change is needed. Only sign-in, billing and schedule fields are fixed columns.
+- **Google Calendar:** on the admin **Today** page, *Get my calendar link* gives a private iCal address; add it in Google Calendar → Add calendar → From URL. It lists each active student's weekly schedule (repeating events, IST) and follows schedule changes automatically; Google re-reads it every few hours. To change the address (if it leaks), set a new `CALENDAR_SALT` variable in Cloudflare.
 - **After any HTML/CSS/JS change:** run `npm run build:pages` (or `python3 tools/stamp_assets.py public`). It adds version tags (`?v=…`) to CSS/JS links so visitors get the new files immediately; Cloudflare otherwise lets browsers keep old copies for 4 hours.
 
 ## Brand
