@@ -62,13 +62,13 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Lexend:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/site.css">{extra_head}
 </head>
 <body>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="Main">
-      <a class="brand" href="/"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="146" height="40"></a>
+      <a class="brand" href="/"><img class="brand-lockup" src="/brand/mathify-logo-horizontal.svg" alt="Mathify" width="142" height="40"></a>
       <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
       <ul class="nav-menu">{nav_html(current)}</ul>
     </nav>

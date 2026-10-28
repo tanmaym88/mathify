@@ -1,10 +1,12 @@
 :root {
+  --font-display: "Lexend", Lato, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-body: Lato, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --navy: #2f3192; --navy-dark: #22246e; --sun: #ffd54f; --ink: #1f2a37; --muted: #5d6675;
   --line: #e3e5ef; --bg: #f5f6fb; --card: #fff; --green: #17803d; --green-bg: #e7f6ec;
   --red: #b42318; --red-bg: #fdecea; --amber: #a15c00; --amber-bg: #fff4e0; --radius: 12px;
 }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.5; color: var(--ink); background: var(--bg); }
+body { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: var(--ink); background: var(--bg); }
 a { color: var(--navy); }
 button, input, select, textarea { font: inherit; }
 [hidden] { display: none !important; }
@@ -22,7 +24,7 @@ button, input, select, textarea { font: inherit; }
 
 main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 60px; }
 .loading { color: var(--muted); }
-h1 { font-size: 1.5rem; margin: 0 0 4px; color: var(--navy); font-weight: 900; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; color: var(--navy); font-weight: 700; }
 h2 { font-size: 1.1rem; margin: 0 0 10px; color: var(--navy); }
 .sub { color: var(--muted); margin: 0 0 18px; font-size: .95rem; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -96,7 +98,7 @@ dialog::backdrop { background: rgba(20,25,35,.5); }
 /* stat tiles */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .stat { background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: 0 1px 6px rgba(31,42,55,.07); }
-.stat b { display: block; font-size: 1.5rem; color: var(--navy); font-weight: 900; }
+.stat b { display: block; font-size: 1.5rem; color: var(--navy); font-weight: 700; }
 .stat span { color: var(--muted); font-size: .85rem; }
 
 .pills { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -127,3 +129,7 @@ dialog::backdrop { background: rgba(20,25,35,.5); }
 .brand-lockup { height: 34px; width: auto; display: block; }
 .login-logo { display: block; margin: 0 auto 12px; height: 148px; width: auto; }
 .preview-banner { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #fff6d6; border: 2px dashed #f2bd1d; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: .95rem; }
+
+/* Brand typography: headings in Lexend */
+h1, h2, h3, h4, .stat b { font-family: var(--font-display); letter-spacing: -0.01em; }
+h2, h3, h4 { font-weight: 600; }
