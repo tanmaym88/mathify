@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 909 1246"><title>Mathify</title>
   <rect width="909" height="1246" rx="110" fill="#2f3192"/>
     <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="#d4d4d8" stroke-width="40" d="M425,860 L350,860 C328,860 318,850 318,828 C318,760 296,705 250,645 C185,560 158,490 160,420 C166,255 300,148 470,148 C640,148 772,255 778,420 C780,490 752,560 688,645 C642,705 620,760 620,828 C620,850 610,860 588,860 L515,860"/>
+    <path stroke="#f6f1e7" stroke-width="40" d="M425,860 L350,860 C328,860 318,850 318,828 C318,760 296,705 250,645 C185,560 158,490 160,420 C166,255 300,148 470,148 C640,148 772,255 778,420 C780,490 752,560 688,645 C642,705 620,760 620,828 C620,850 610,860 588,860 L515,860"/>
     <path stroke="#ffffff" stroke-width="42" d="M246,432 C246,322 336,242 452,236"/>
   </g>
   <g fill="#f7941d">
@@ -13,7 +13,7 @@
     <rect x="444" y="718" width="46" height="165" rx="6"/>
     <rect x="382" y="782" width="170" height="46" rx="6"/>
   </g>
-  <rect x="320" y="922" width="292" height="44" rx="8" fill="#86868b"/>
-  <rect x="320" y="996" width="292" height="44" rx="8" fill="#98989c"/>
-  <path d="M392,1078 L542,1078 L467,1152 Z" fill="#bebec1"/>
+  <rect x="320" y="922" width="292" height="44" rx="8" fill="#f6f1e7"/>
+  <rect x="320" y="996" width="292" height="44" rx="8" fill="#e5ddcc"/>
+  <path d="M392,1078 L542,1078 L467,1152 Z" fill="#f6f1e7"/>
 </svg>

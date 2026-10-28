@@ -583,18 +583,18 @@
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const W = doc.internal.pageSize.getWidth(), L = 48, R = W - 48;
     let y = 56;
-    doc.setFillColor(255, 213, 79); doc.rect(0, 0, W, 8, 'F');
+    doc.setFillColor(229, 221, 204); doc.rect(0, 0, W, 8, 'F');
     if (state.logo) doc.addImage(state.logo, 'PNG', L, y - 36, 142, 40);
     else { doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(47, 49, 146); doc.text('MATHIFY', L, y); }
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(31, 42, 55); doc.text('INVOICE', R, y, { align: 'right' });
-    y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(93, 102, 117);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(0, 0, 0); doc.text('INVOICE', R, y, { align: 'right' });
+    y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(0, 0, 0);
     doc.text(`${inv.business.owner} · ${inv.business.city}`, L, y);
     doc.text(`Invoice no: ${inv.invoice_number}`, R, y, { align: 'right' });
     y += 14;
     const contact = [inv.business.whatsapp ? 'WhatsApp +' + inv.business.whatsapp : '', inv.business.email].filter(Boolean).join(' · ');
     doc.text(contact, L, y); doc.text(`Date: ${inv.issued_on}`, R, y, { align: 'right' });
     y += 34;
-    doc.setTextColor(31, 42, 55); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
     doc.text('Billed to', L, y); doc.text('Period', R, y, { align: 'right' });
     doc.setFont('helvetica', 'normal'); y += 15;
     doc.text(inv.student.name, L, y); doc.text(monthName(inv.month), R, y, { align: 'right' });
@@ -602,7 +602,7 @@
     y += 30;
     const cols = [L, L + 110, L + 210, L + 330, R - 80, R];
     const head = ['Date', 'Time', 'Status', 'Hours', 'Rate', 'Amount'];
-    doc.setFillColor(242, 243, 251); doc.rect(L - 6, y - 13, R - L + 12, 20, 'F');
+    doc.setFillColor(246, 241, 231); doc.rect(L - 6, y - 13, R - L + 12, 20, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
     head.forEach((h, i) => doc.text(h, i >= 3 ? cols[i] + (i === 3 ? 30 : 0) : cols[i], y, i >= 3 ? { align: 'right' } : undefined));
     doc.setFont('helvetica', 'normal'); y += 22;
@@ -613,7 +613,7 @@
       doc.text(String(l.hours), cols[3] + 30, y, { align: 'right' }); doc.text(rs(l.rate), cols[4], y, { align: 'right' }); doc.text(rs(l.amount), cols[5], y, { align: 'right' });
       y += 18;
     }
-    if (!inv.lines.length) { doc.setTextColor(93, 102, 117); doc.text('No chargeable classes this month.', L, y); y += 18; doc.setTextColor(31, 42, 55); }
+    if (!inv.lines.length) { doc.setTextColor(0, 0, 0); doc.text('No chargeable classes this month.', L, y); y += 18; doc.setTextColor(0, 0, 0); }
     y += 6; doc.setDrawColor(227, 229, 239); doc.line(L - 6, y, R + 6, y); y += 20;
     const total = (label, val, bold) => { doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.text(label, R - 140, y, { align: 'right' }); doc.text(val, R, y, { align: 'right' }); y += 18; };
     total('Total hours', String(inv.total_hours));
@@ -621,7 +621,7 @@
     if (inv.paid) total(`Paid (${inv.paid.method}, ${inv.paid.paid_on})`, '- ' + rs(inv.paid.amount));
     doc.setTextColor(inv.balance > 0 ? 180 : 23, inv.balance > 0 ? 35 : 128, inv.balance > 0 ? 24 : 61);
     total(inv.balance > 0 ? 'Balance due' : 'Balance', rs(Math.max(0, inv.balance)), true);
-    doc.setTextColor(93, 102, 117); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
     y += 20;
     doc.text('Fees are charged per hour and payable between the 1st and 5th of the following month.', L, y); y += 13;
     doc.text('Classes cancelled with under 3 hours\' notice are charged. Thank you for learning with Mathify!', L, y);

@@ -2,7 +2,7 @@
 """Builds every Mathify logo file from the bulb icon + the "Mathify" wordmark.
 
 Wordmark: Lexend ExtraBold (a typeface designed for easier reading — fitting for a teaching brand),
-"Math" in navy, "ify" in orange, and the dot of the i is an orange circle (the same orange as the π in the bulb). Stacked lockups add the tagline MATHS SIMPLIFIED.
+"Math" in navy, "ify" in orange, and the dot of the i is an orange circle (the same orange as the π in the bulb). Stacked lockups add the tagline MATHS SIMPLIFIED. Brand surface colour: ivory.
 
 Run:  python3 tools/make_logo.py        (needs: pip install fonttools brotli; Playwright for PNGs)
 Writes public/brand/*.svg|png, public/assets/logo-invoice*.png.
@@ -14,7 +14,7 @@ from fontTools.pens.recordingPen import RecordingPen
 HERE = os.path.dirname(os.path.abspath(__file__))
 PUB = os.path.join(HERE, "..", "public")
 BRAND = os.path.join(PUB, "brand")
-NAVY, ORANGE, GREY, YELLOW, WHITE = "#2f3192", "#f7941d", "#6b6b73", "#ffd54f", "#ffffff"
+NAVY, ORANGE, IVORY, BLACK, WHITE = "#2f3192", "#f7941d", "#f6f1e7", "#000000", "#ffffff"
 BOLD = os.path.join(HERE, "fonts", "lexend-latin-800-normal.woff2")
 SEMI = os.path.join(HERE, "fonts", "lexend-latin-600-normal.woff2")
 
@@ -82,8 +82,7 @@ B, T = Font(BOLD), Font(SEMI)
 
 
 def wordmark(cap, scheme):
-    math_c, ify_c, plus_c = {"colour": (NAVY, ORANGE, ORANGE), "white": (WHITE, ORANGE, ORANGE),
-                             "yellow": (NAVY, NAVY, NAVY)}[scheme]
+    math_c, ify_c, plus_c = {"colour": (NAVY, ORANGE, ORANGE), "white": (WHITE, ORANGE, ORANGE)}[scheme]
     return text_paths(B, "Mathify", cap, [math_c] * 4 + [ify_c] * 3, tracking=-12, plus_dot=plus_c)
 
 
@@ -116,8 +115,7 @@ def horizontal(scheme="colour", pad=0, bg=None):
 def stacked(scheme="colour", square=False, bg=None):
     cap = 560
     wm, ww = wordmark(cap, scheme)
-    tl, tw, tcap = tagline(ww * 0.9, GREY if scheme != "white" else "#d4d4d8")
-    if scheme == "yellow": tl = tl.replace(GREY, NAVY)
+    tl, tw, tcap = tagline(ww * 0.9, BLACK if scheme != "white" else IVORY)
     W = max(ww, ICON_W) + 40
     y_word = ICON_H + 200 + cap
     y_tag = y_word + 0.36 * cap + 130 + tcap
@@ -140,10 +138,9 @@ def main():
     hz, ratio = horizontal()
     write("mathify-logo-horizontal.svg", hz)
     write("mathify-logo-horizontal-white.svg", horizontal("white")[0])
-    write("mathify-logo-horizontal-navy.svg", horizontal("yellow")[0])   # for the yellow navbars
-    write("mathify-logo-horizontal-yellow.svg", horizontal("yellow", pad=300, bg=YELLOW)[0])
+    write("mathify-logo-horizontal-ivory.svg", horizontal(pad=300, bg=IVORY)[0])
     write("mathify-logo-stacked.svg", stacked())
-    write("mathify-logo-stacked-yellow.svg", stacked("yellow", square=True, bg=YELLOW))
+    write("mathify-logo-stacked-ivory.svg", stacked(square=True, bg=IVORY))
     print(f"horizontal aspect ratio {ratio:.3f}  (navbar: height 40 -> width {40*ratio:.0f})")
     render_pngs()
 
@@ -153,36 +150,36 @@ def render_pngs():
     jobs = [  # (source svg, out png, width, height or None, background)
         ("mathify-logo-horizontal.svg", "brand/mathify-logo-horizontal.png", 2000, None, None),
         ("mathify-logo-horizontal-white.svg", "brand/mathify-logo-horizontal-white.png", 2000, None, None),
-        ("mathify-logo-horizontal-yellow.svg", "brand/mathify-logo-horizontal-yellow.png", 2400, None, None),
+        ("mathify-logo-horizontal-ivory.svg", "brand/mathify-logo-horizontal-ivory.png", 2400, None, None),
         ("mathify-logo-stacked.svg", "brand/mathify-logo-stacked.png", 1500, None, None),
-        ("mathify-logo-stacked-yellow.svg", "brand/mathify-logo-stacked-yellow.png", 1500, None, None),
+        ("mathify-logo-stacked-ivory.svg", "brand/mathify-logo-stacked-ivory.png", 1500, None, None),
+        ("mathify-icon.svg", "assets/logo-invoice.png", 219, None, None),
+        ("../assets/favicon.svg", "assets/apple-touch-icon.png", 180, None, None),
+        ("../assets/favicon.svg", "assets/icon-512.png", 512, None, None),
+        ("../assets/favicon.svg", "brand/mathify-icon-512.png", 512, None, None),
         ("mathify-logo-horizontal.svg", "assets/logo-invoice-wide.png", 600, None, None),
     ]
     with sync_playwright() as p:
         br = p.chromium.launch()
         for src, out, w, h, _ in jobs:
             svg = open(os.path.join(BRAND, src)).read()
-            vw, vh = map(float, re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg).groups())
+            vw, vh = map(float, re.search(r'viewBox="[-\d.]+ [-\d.]+ ([\d.]+) ([\d.]+)"', svg).groups())
             h = round(w * vh / vw)
             pg = br.new_page(viewport={"width": w, "height": h})
             pg.set_content(f'<html><body style="margin:0;background:transparent">'
-                           f'{svg.replace(f"width=\"{vw:.0f}\" height=\"{vh:.0f}\"", f"width=\"{w}\" height=\"{h}\"")}</body></html>')
+                           f'{re.sub(r"<svg ([^>]*?)(?: width=\"[\d.]+\" height=\"[\d.]+\")?>", lambda m: f"<svg {m.group(1)} width=\"{w}\" height=\"{h}\">", svg, count=1)}</body></html>')
             pg.screenshot(path=os.path.join(PUB, out), omit_background=True, clip={"x": 0, "y": 0, "width": w, "height": h})
             pg.close()
         # social share card 1200x630
         pg = br.new_page(viewport={"width": 1200, "height": 630})
         logo = open(os.path.join(BRAND, "mathify-logo-horizontal.svg")).read()
         pg.set_content(f'''<html><head><style>@font-face{{font-family:L;src:url(data:font/woff2;base64,{b64(SEMI)})}}
-          body{{margin:0;width:1200px;height:630px;background:{YELLOW};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px}}
-          svg{{width:780px;height:auto}} p{{font:600 34px L;color:{NAVY};margin:0}}</style></head>
-          <body>{logo.replace(TAG_NAVY_FIX[0], TAG_NAVY_FIX[1])}<p>One-to-one Maths teaching · Online worldwide &amp; in Pune</p></body></html>''')
+          body{{margin:0;width:1200px;height:630px;background:{IVORY};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px}}
+          svg{{width:780px;height:auto}} p{{font:600 34px L;color:{BLACK};margin:0}}</style></head>
+          <body>{logo}<p>One-to-one Maths teaching · Online worldwide &amp; in Pune</p></body></html>''')
         pg.wait_for_timeout(300)
         pg.screenshot(path=os.path.join(BRAND, "mathify-share.png"))
         br.close()
-
-
-# on the yellow share card, "ify" switches to navy (orange on yellow is hard to read)
-TAG_NAVY_FIX = (f'<path fill="{ORANGE}" d="', f'<path fill="{NAVY}" d="')
 
 
 def b64(path):

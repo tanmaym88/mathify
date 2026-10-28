@@ -11,8 +11,8 @@ ROOT = sys.argv[1] if len(sys.argv) > 1 else "public"
 OUT = os.path.join(ROOT, "images", "avatars")
 os.makedirs(OUT, exist_ok=True)
 
-NAVY, GOLD, ORANGE, INDIGO = "#2f3192", "#f2bd1d", "#f7941d", "#6d70c9"
-BGS = ["#fff6d6", "#e9eaf8", "#fde8d2", "#eef6ee"]
+NAVY, GOLD, ORANGE, INDIGO = "#2f3192", "#cbbd9e", "#f7941d", "#6d70c9"  # GOLD = ivory-sand (yellow retired)
+BGS = ["#f6f1e7", "#e9eaf8", "#fde8d2", "#eef6ee"]
 SKINS = ["#e0ac85", "#c68863", "#f1c7a1", "#a86f4c"]
 HAIRS = ["#2b2118", "#4a2f1d", "#1b1b1b", "#5a3a22"]
 
