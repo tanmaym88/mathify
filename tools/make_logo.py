@@ -156,6 +156,8 @@ def render_pngs():
         ("mathify-icon.svg", "assets/logo-invoice.png", 219, None, None),
         ("../assets/favicon.svg", "assets/apple-touch-icon.png", 180, None, None),
         ("../assets/favicon.svg", "assets/icon-512.png", 512, None, None),
+        ("../assets/favicon.svg", "assets/icon-192.png", 192, None, None),
+        ("../assets/icon-maskable.svg", "assets/icon-maskable-512.png", 512, None, None),
         ("../assets/favicon.svg", "brand/mathify-icon-512.png", 512, None, None),
         ("mathify-logo-horizontal.svg", "assets/logo-invoice-wide.png", 600, None, None),
     ]

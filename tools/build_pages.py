@@ -60,6 +60,8 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#f6f1e7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Lexend:wght@600;700&display=swap" rel="stylesheet">
@@ -83,8 +85,10 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
     <a href="/feedback">Give feedback</a> ·
     <a href="/privacy">Privacy</a> ·
     <a href="/terms">Terms</a>
+    <button type="button" class="install-btn" data-install hidden>Install the Mathify app</button>
   </footer>
-  <script src="/assets/nav.js"></script>{extra_scripts}
+  <script src="/assets/nav.js"></script>
+  <script src="/assets/pwa.js"></script>{extra_scripts}
 </body>
 </html>
 """
