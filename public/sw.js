@@ -1,7 +1,7 @@
 // Mathify service worker: makes the site installable as an app and usable on a weak connection.
 // Pages: network first (always fresh), cached copy when offline. Files with ?v= hashes: cache first.
 // Never touches /api/ (sign-in, classes, fees always come live from the server).
-const VERSION = 'mathify-v1';
+const VERSION = 'mathify-v2';
 const CORE = ['/', '/offline.html', '/app/', '/assets/site.css', '/assets/nav.js', '/assets/icon-192.png'];
 
 self.addEventListener('install', e => {

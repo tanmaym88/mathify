@@ -62,6 +62,10 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#f6f1e7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mathify">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Lexend:wght@600;700&display=swap" rel="stylesheet">
@@ -86,6 +90,7 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
     <a href="/privacy">Privacy</a> ·
     <a href="/terms">Terms</a>
     <button type="button" class="install-btn" data-install hidden>Install the Mathify app</button>
+    <p class="install-ios" hidden>On iPhone/iPad: tap <b>Share</b> <span aria-hidden="true">⬆︎</span> in Safari, then <b>Add to Home Screen</b>.</p>
   </footer>
   <script src="/assets/nav.js"></script>
   <script src="/assets/pwa.js"></script>{extra_scripts}
