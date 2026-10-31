@@ -189,10 +189,12 @@
               ${x.phone ? `<a class="btn small wa" target="_blank" rel="noopener" href="https://wa.me/${waNumber(x.phone)}?text=${encodeURIComponent(`Hello, a gentle reminder from Mathify: fees of ${inr(x.balance)} for ${monthName(x.month)} (${x.name}) are due. Thank you!`)}">Remind</a>` : ''}</div>
           </div>`).join('') : '<p class="empty">Nothing due. 🎉</p>'}
       </div>
+      <div id="month-end"></div>
       <div class="card"><h2>Google Calendar</h2>
         <p class="hint">Show every student's weekly class timings in your Google Calendar. It updates by itself when you change a schedule or deactivate a student (Google refreshes it every few hours).</p>
         <div id="cal-box"><button class="btn small secondary" id="cal-show">Get my calendar link</button></div>
       </div>`;
+    monthEndCard(now.date).catch(e => toast(e.message, true));
     $('#cal-show').onclick = async () => {
       try {
         const { url } = await api('/calendar-link');
@@ -650,6 +652,55 @@
     return doc;
   }
 
+  // WhatsApp fee message (Tanmay's wording)
+  function feesMessage(inv, month) {
+    const due = inv.balance > 0 ? inv.balance : inv.total;
+    const hrs = Number(inv.total_hours);
+    return `Dear Parent,\nKindly pay ${inv.student.name}’s fees for the month of ${monthName(month)}.\n` +
+      `It would be INR ${Math.round(due).toLocaleString('en-IN')}, as we had ${hrs} hour${hrs === 1 ? '' : 's'} of classes.\n` +
+      `Thanks and Regards\nTanmay`;
+  }
+  const waSend = (phone, text) => `https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`;
+  async function sharePDF(inv, month, text) {
+    const filename = `Mathify-invoice-${inv.student.name.replace(/[^\w]+/g, '-')}-${month}.pdf`;
+    const blob = buildInvoicePDF(inv).output('blob');
+    await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], text });
+  }
+  const canShareFiles = () => !!(navigator.canShare && window.File && navigator.canShare({ files: [new File([''], 'x.pdf', { type: 'application/pdf' })] }));
+
+  // Month-end: one place to send every parent the invoice + fee message (last 3 days of a month → that month; first 7 days → previous month)
+  async function monthEndCard(today) {
+    const box = $('#month-end'); if (!box) return;
+    const [y, m, d] = today.split('-').map(Number);
+    const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    let month = null;
+    if (d >= last - 2) month = today.slice(0, 7);
+    else if (d <= 7) { const pm = new Date(Date.UTC(y, m - 2, 1)); month = pm.toISOString().slice(0, 7); }
+    if (!month) return;
+    const { students } = await api('/students');
+    const invs = (await Promise.all(students.filter(x => x.is_active).map(async st => ({ st, inv: await api(`/students/${st.id}/invoice/${month}`) }))))
+      .filter(({ inv }) => inv.total > 0);
+    const share = canShareFiles();
+    box.innerHTML = `<div class="card"><h2>Send ${esc(monthName(month))} invoices</h2>
+      ${invs.length ? invs.map(({ st, inv }, i) => `
+        <div class="list-item">
+          <div><strong>${esc(st.name)}</strong><br><span class="hint">${inv.total_hours} hours · ${inr(inv.total)}${inv.balance <= 0 ? ' · paid' : ''}</span></div>
+          <div class="row">${inv.balance <= 0 ? '<span class="badge green">Paid</span>' : `
+            ${share ? `<button class="btn small wa" data-me-share="${i}">Share PDF + message</button>` : ''}
+            ${st.phone ? `<a class="btn small ${share ? 'secondary' : 'wa'}" target="_blank" rel="noopener" href="${esc(waSend(st.phone, feesMessage(inv, month)))}">WhatsApp message</a>` : '<span class="hint">No WhatsApp number</span>'}
+            ${share ? '' : `<button class="btn small secondary" data-me-dl="${i}">PDF</button>`}`}</div>
+        </div>`).join('') : `<p class="empty">No classes recorded in ${esc(monthName(month))}.</p>`}
+      <p class="hint">${share ? '“Share PDF + message” opens WhatsApp with the invoice attached and your message filled in; pick the parent and send.' : 'On your phone, one tap attaches the PDF too. Here: send the message, then attach the downloaded PDF.'}</p></div>`;
+    $$('[data-me-share]').forEach(b => b.onclick = async () => {
+      const { inv } = invs[Number(b.dataset.meShare)];
+      try { await sharePDF(inv, month, feesMessage(inv, month)); } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
+    });
+    $$('[data-me-dl]').forEach(b => b.onclick = () => {
+      const { inv } = invs[Number(b.dataset.meDl)];
+      try { buildInvoicePDF(inv).save(`Mathify-invoice-${inv.student.name.replace(/[^\w]+/g, '-')}-${month}.pdf`); } catch (e) { toast(e.message, true); }
+    });
+  }
+
   async function invoiceModal(s, month, admin) {
     const inv = await api(`/students/${s.id}/invoice/${month}`);
     const filename = `Mathify-invoice-${inv.student.name.replace(/[^\w]+/g, '-')}-${month}.pdf`;
@@ -665,7 +716,7 @@
       <div class="row" style="margin-top:16px">
         <button type="button" class="btn" id="inv-dl">Download PDF</button>
         ${admin && canShareFile ? '<button type="button" class="btn wa" id="inv-share">Share PDF…</button>' : ''}
-        ${admin && s.phone ? `<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${waNumber(s.phone)}?text=${encodeURIComponent('Hello! ' + summary)}">Send on WhatsApp</a>` : ''}
+        ${admin && s.phone ? `<a class="btn wa" target="_blank" rel="noopener" href="${esc(waSend(s.phone, feesMessage(inv, month)))}">Send on WhatsApp</a>` : ''}
         ${admin && to ? `<a class="btn secondary" href="mailto:${esc(to)}?subject=${encodeURIComponent('Mathify invoice — ' + monthName(month))}&body=${encodeURIComponent('Hello,\n\n' + summary + '\n\nThe PDF invoice is attached.\n\nRegards,\nTanmay Mogra\nMathify')}">Email</a>` : ''}
       </div>
       ${admin ? `<p class="hint">WhatsApp and email open with the summary filled in. ${canShareFile ? '“Share PDF” attaches the PDF directly (phones).' : 'Download the PDF first if you want to attach it.'}</p>` : ''}
@@ -675,7 +726,7 @@
     if (sh) sh.onclick = async () => {
       try {
         const blob = buildInvoicePDF(inv).output('blob');
-        await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], text: summary });
+        await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], text: feesMessage(inv, month) });
       } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
     };
   }

@@ -159,7 +159,10 @@ with sync_playwright() as p:
     pg.click("[data-inv='2026-09']"); pg.wait_for_selector("#inv-dl")
     ok("invoice summary balance ₹500", "₹500" in pg.inner_text("#modal-form"))
     wa = pg.get_attribute("#modal-form a.wa", "href")
-    ok("WhatsApp invoice link to student phone", wa.startswith("https://wa.me/919820011111?text=") and "Balance%20due" in wa, wa[:80])
+    import urllib.parse as _u
+    msg = _u.unquote(wa.split("?text=", 1)[1]) if "?text=" in wa else ""
+    ok("WhatsApp invoice link to student phone", wa.startswith("https://wa.me/919820011111?text="), wa[:80])
+    ok("WhatsApp fee message in Tanmay's wording", msg == "Dear Parent,\nKindly pay Ishaan Rao’s fees for the month of September 2026.\nIt would be INR 500, as we had 2.5 hours of classes.\nThanks and Regards\nTanmay", msg)
     with pg.expect_download() as dl:
         pg.click("#inv-dl")
     path = dl.value.path()
