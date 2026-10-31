@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "world.mathify.twa",
+    "sha256_cert_fingerprints": ["0D:14:50:77:29:01:7D:B7:91:90:21:33:AB:04:C5:D6:0A:2A:1A:D7:D4:5C:73:4D:52:79:6A:08:46:B6:5C:5E"]
+  }
+}]
