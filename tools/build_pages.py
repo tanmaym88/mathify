@@ -328,7 +328,7 @@ aptitude = """    <div class="puzzle-page">
       <div id="cop-overlay" role="dialog" aria-modal="true" aria-label="Puzzle solved">
         <div class="cop-modal">
           <h2>🎉🎉🎉🎉🎉</h2>
-          <p id="cop-successText" hidden></p>
+          <p id="cop-successText">You have a good aptitude for learning Maths!</p>
           <a class="cop-icon" id="cop-enter" href="/" aria-label="Go to the home page" title="Home">→</a>
           <button type="button" class="cop-icon cop-ghost" id="cop-again" aria-label="Play again" title="Play again">↻</button>
         </div>

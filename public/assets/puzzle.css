@@ -73,3 +73,4 @@
   #cop #cop-scatter { height: clamp(190px, calc(100svh - 390px), 300px); }
   #cop #cop-slots { grid-template-columns: repeat(3, calc(var(--size) + 8px)); gap: 8px; }
 }
+#cop-overlay #cop-successText { margin: 0 0 18px; font: 700 1.25rem/1.35 var(--font-display, "Lexend", sans-serif); color: #2f3192; }

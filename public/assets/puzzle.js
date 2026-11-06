@@ -131,8 +131,7 @@
   }
 
   function win(asc) {
-    var list = ITEMS.map(function (it, i) { return (i + 1) + ' ' + (i === 0 ? it[1] : it[2]); });
-    $('cop-successText').textContent = 'You arranged them perfectly: ' + (asc ? list : list.reverse()).join(', ') + '.';
+    $('cop-successText').textContent = 'You have a good aptitude for learning Maths!';
     try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
     $('cop-skip').classList.add('show');
     overlay.classList.add('show');

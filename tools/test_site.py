@@ -62,6 +62,7 @@ with sync_playwright() as p:
         drag_card_to_slot(c, c-1)
     page.wait_for_timeout(400)
     ok("solving shows success overlay", page.locator("#cop-overlay.show").count() == 1)
+    ok("success message", page.inner_text("#cop-successText") == "You have a good aptitude for learning Maths!", page.inner_text("#cop-successText"))
     ok("solving sets unlock flag", page.evaluate("localStorage.getItem('mathifyUnlocked')") == "1")
     page.screenshot(path=f"{OUT}/puzzle_solved.png")
 
