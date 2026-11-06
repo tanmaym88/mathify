@@ -89,8 +89,6 @@ def page(path, title, description, body, current=None, extra_scripts="", extra_h
     <a href="/feedback">Give feedback</a> ·
     <a href="/privacy">Privacy</a> ·
     <a href="/terms">Terms</a>
-    <button type="button" class="install-btn" data-install hidden>Install the Mathify app</button>
-    <p class="install-ios" hidden>On iPhone/iPad: tap <b>Share</b> <span aria-hidden="true">⬆︎</span> in Safari, then <b>Add to Home Screen</b>.</p>
   </footer>
   <script src="/assets/nav.js"></script>
   <script src="/assets/pwa.js"></script>{extra_scripts}
