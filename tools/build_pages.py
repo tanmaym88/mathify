@@ -112,7 +112,6 @@ welcome = """    <section class="hero">
       <a class="tile" href="/about-the-teacher"><strong>The Teacher</strong><span>Tanmay Mogra — IIT alumnus, JEE AIR 328, 10+ years of teaching.</span></a>
       <a class="tile" href="/fees-and-schedule"><strong>Fees and Schedule</strong><span>Hourly billing, weekly schedule and the rescheduling policy.</span></a>
       <a class="tile" href="/testimonials"><strong>Testimonials</strong><span>What parents and students across India, UK and UAE say.</span></a>
-      <a class="tile" href="/aptitude-test"><strong>Aptitude Test</strong><span>A quick picture puzzle. Can you crack the order?</span></a>
       <a class="tile" href="/contact"><strong>Contact</strong><span>Send an enquiry on WhatsApp or by email.</span></a>
     </div>"""
 page("/", "Mathify", "Mathify — one-to-one Maths coaching by Tanmay Mogra (IIT alumnus, JEE AIR 328). Online worldwide and offline in Magarpatta, Pune.", welcome, current="/")
